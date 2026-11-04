@@ -4,6 +4,7 @@ services:
     runtime: docker
     plan: free
     branch: main
+    region: singapore
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /health
