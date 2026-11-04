@@ -75,6 +75,8 @@ To deploy it:
 
 Render's free web service sleeps after 15 minutes without a request and can take about a minute to wake up. Its local disk is temporary, so the app uses Neon for records that should stay after redeploys and restarts. Free hosting is suitable for a class demo and does not provide a production uptime guarantee. See [Render free plan details](https://render.com/docs/free), [Neon free plan details](https://neon.com/blog/neon-free-plan-1-gb-per-project), and [Render Blueprints](https://render.com/docs/blueprint-spec).
 
+After Render is connected to the repository, pushes to `main` can trigger a new deploy. If automatic deploys are turned off, choose **Manual Deploy > Deploy latest commit** in the Render dashboard. The Neon database settings stay in Render's environment settings, and the database records remain outside the app container.
+
 ## Public demo note
 
 This version does not have user accounts. A public deployment shares one habit list with everyone who visits it, and visitors can add or delete habits. Do not store private information in a public demo.
