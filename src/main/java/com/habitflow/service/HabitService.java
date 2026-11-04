@@ -79,6 +79,10 @@ public class HabitService implements AutoCloseable {
 
     public void toggleToday(long habitId, String note) {
         LocalDate today = LocalDate.now();
+        String cleanNote = cleanText(note);
+        if (cleanNote.length() > 250) {
+            throw new HabitValidationException("Check-in note must be 250 characters or fewer");
+        }
         stateLock.writeLock().lock();
         try {
             Habit habit = habitDao.findById(habitId)
@@ -89,7 +93,7 @@ public class HabitService implements AutoCloseable {
             if (habitDao.hasCheckin(habitId, today)) {
                 habitDao.removeCheckin(habitId, today);
             } else {
-                habitDao.addCheckin(habitId, today, note == null ? "" : note.trim());
+                habitDao.addCheckin(habitId, today, cleanNote);
             }
         } finally {
             stateLock.writeLock().unlock();

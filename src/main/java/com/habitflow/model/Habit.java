@@ -32,4 +32,22 @@ public record Habit(
     public boolean isScheduledOn(LocalDate date) {
         return HabitScheduleFactory.fromFrequency(frequency).isScheduledOn(date, createdAt);
     }
+
+    public boolean isScheduledToday() {
+        return isScheduledOn(LocalDate.now());
+    }
+
+    // JavaBean getters keep the record values available to JSP Expression Language.
+    public long getId() { return id; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public String getCategory() { return category; }
+    public String getFrequency() { return frequency; }
+    public String getColor() { return color; }
+    public LocalDate getCreatedAt() { return createdAt; }
+    public boolean getCompletedToday() { return completedToday; }
+    public int getCurrentStreak() { return currentStreak; }
+    public int getBestStreak() { return bestStreak; }
+    public int getWeeklyCheckIns() { return weeklyCheckIns; }
+    public int getCompletionRate() { return completionRate; }
 }

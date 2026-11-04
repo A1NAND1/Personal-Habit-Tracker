@@ -6,6 +6,7 @@ package com.habitflow.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -13,23 +14,29 @@ import java.sql.Statement;
 
 // JDBC: opens H2 connections and loads the schema during startup.
 public final class Database {
-    private static final String URL = "jdbc:h2:./data/habitflow;AUTO_SERVER=TRUE";
-    private static final String USER = "sa";
-    private static final String PASSWORD = "";
-
-    static {
-        try {
-            Class.forName("org.h2.Driver");
-        } catch (ClassNotFoundException exception) {
-            throw new ExceptionInInitializerError(exception);
-        }
-    }
-
     private Database() {
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        String url = setting("habit.tracker.jdbc.url", "JDBC_URL");
+        if (url == null) {
+            url = localUrl();
+        }
+        if (isProduction() && !url.startsWith("jdbc:postgresql:")) {
+            throw new IllegalStateException("Production must use a PostgreSQL JDBC_URL.");
+        }
+        loadDriver(url);
+        String user = setting("habit.tracker.jdbc.user", "JDBC_USER");
+        String password = setting("habit.tracker.jdbc.password", "JDBC_PASSWORD");
+        if (isProduction() && (user == null || password == null)) {
+            throw new IllegalStateException("Set JDBC_USER and JDBC_PASSWORD for production.");
+        }
+        return DriverManager.getConnection(url, user == null ? "sa" : user, password == null ? "" : password);
+    }
+
+    public static boolean isPostgres() {
+        String url = setting("habit.tracker.jdbc.url", "JDBC_URL");
+        return url != null && url.startsWith("jdbc:postgresql:");
     }
 
     public static void initialize() {
@@ -49,5 +56,39 @@ public final class Database {
         } catch (SQLException | IOException exception) {
             throw new IllegalStateException("Unable to initialize the database", exception);
         }
+    }
+
+    private static String localUrl() {
+        if (isProduction()) {
+            throw new IllegalStateException("Set JDBC_URL to a persistent PostgreSQL database for production.");
+        }
+        String dataDirectory = setting("habit.tracker.data.dir", "APP_DATA_DIR");
+        String databaseFile = dataDirectory == null
+                ? Path.of(System.getProperty("catalina.base", "."), "data", "habitflow")
+                    .toAbsolutePath().toString().replace('\\', '/')
+                : Path.of(dataDirectory, "habitflow").toString().replace('\\', '/');
+        return "jdbc:h2:" + databaseFile;
+    }
+
+    private static void loadDriver(String url) {
+        String driver = url.startsWith("jdbc:postgresql:") ? "org.postgresql.Driver" : "org.h2.Driver";
+        try {
+            Class.forName(driver, true, Database.class.getClassLoader());
+        } catch (ClassNotFoundException exception) {
+            throw new IllegalStateException("Database driver is missing: " + driver, exception);
+        }
+    }
+
+    private static boolean isProduction() {
+        String environment = setting("habit.tracker.environment", "APP_ENV");
+        return "production".equalsIgnoreCase(environment);
+    }
+
+    private static String setting(String propertyName, String environmentName) {
+        String value = System.getProperty(propertyName);
+        if (value == null || value.isBlank()) {
+            value = System.getenv(environmentName);
+        }
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

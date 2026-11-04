@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 // Testing and collections: this test checks dashboard totals using a habit list.
 class HabitServiceTest {
@@ -25,15 +26,19 @@ class HabitServiceTest {
             public void addCheckin(long habitId, LocalDate date, String note) { }
             public void removeCheckin(long habitId, LocalDate date) { }
         };
-        HabitService service = new HabitService(unusedDao);
-        List<Habit> habits = List.of(
-                new Habit(1, "Read", "", "Mind", "Daily", "#fff", LocalDate.now(), true, 8, 80),
-                new Habit(2, "Walk", "", "Body", "Daily", "#fff", LocalDate.now(), false, 12, 90)
-        );
+        try (HabitService service = new HabitService(unusedDao)) {
+            List<Habit> habits = List.of(
+                    new Habit(1, "Read", "", "Mind", "Daily", "#fff", LocalDate.now(), true, 8, 80),
+                    new Habit(2, "Walk", "", "Body", "Daily", "#fff", LocalDate.now(), false, 12, 90)
+            );
 
-        assertEquals(2, service.getStats(habits).totalHabits());
-        assertEquals(1, service.getStats(habits).completedToday());
-        assertEquals(12, service.getStats(habits).bestStreak());
-        service.close();
+            assertEquals(2, service.getStats(habits).totalHabits());
+            assertEquals(1, service.getStats(habits).completedToday());
+            assertEquals(12, service.getStats(habits).bestStreak());
+            assertThrows(IllegalArgumentException.class,
+                    () -> service.create("  ", "", "Mind", "Daily", "#5B5FEF"));
+            assertThrows(IllegalArgumentException.class,
+                    () -> service.toggleToday(1, "x".repeat(251)));
+        }
     }
 }

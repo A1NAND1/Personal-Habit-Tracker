@@ -124,9 +124,12 @@ public class JdbcHabitDao implements HabitDao {
 
     @Override
     public void addCheckin(long habitId, LocalDate date, String note) {
+        String sql = Database.isPostgres()
+                ? "INSERT INTO habit_checkins(habit_id, checkin_date, note) VALUES (?, ?, ?) "
+                    + "ON CONFLICT (habit_id, checkin_date) DO UPDATE SET note = EXCLUDED.note"
+                : "MERGE INTO habit_checkins(habit_id, checkin_date, note) KEY(habit_id, checkin_date) VALUES (?, ?, ?)";
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "MERGE INTO habit_checkins(habit_id, checkin_date, note) KEY(habit_id, checkin_date) VALUES (?, ?, ?)")) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, habitId);
             statement.setDate(2, Date.valueOf(date));
             statement.setString(3, note);

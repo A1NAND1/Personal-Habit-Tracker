@@ -17,6 +17,7 @@ import java.io.IOException;
 public class HabitServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding(java.nio.charset.StandardCharsets.UTF_8.name());
         HabitService service = (HabitService) getServletContext().getAttribute("habitService");
         try {
             service.create(request.getParameter("name"), request.getParameter("description"),

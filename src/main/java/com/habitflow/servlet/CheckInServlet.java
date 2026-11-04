@@ -16,14 +16,21 @@ import java.io.IOException;
 public class CheckInServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding(java.nio.charset.StandardCharsets.UTF_8.name());
         HabitService service = (HabitService) getServletContext().getAttribute("habitService");
         try {
             service.toggleToday(Long.parseLong(request.getParameter("habitId")), request.getParameter("note"));
             response.sendRedirect(request.getContextPath() + "/");
         } catch (NumberFormatException exception) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid habit id");
+            redirectWithError(request, response, "Invalid habit id");
         } catch (IllegalArgumentException exception) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, exception.getMessage());
+            redirectWithError(request, response, exception.getMessage());
         }
+    }
+
+    private void redirectWithError(HttpServletRequest request, HttpServletResponse response, String message)
+            throws IOException {
+        String error = java.net.URLEncoder.encode(message, java.nio.charset.StandardCharsets.UTF_8);
+        response.sendRedirect(request.getContextPath() + "/?error=" + error);
     }
 }

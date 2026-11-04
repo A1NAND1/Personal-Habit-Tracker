@@ -51,7 +51,7 @@
                         <article class="habit-card">
                             <div class="habit-color" style="background:${habit.color}"></div>
                             <div class="habit-main"><div class="habit-title-row"><h3><c:out value="${habit.name}" /></h3><span class="category"><c:out value="${habit.category}" /></span></div><p><c:out value="${habit.description}" /></p><div class="habit-meta"><span>◷ <c:out value="${habit.frequency}" /></span><span>♨ ${habit.currentStreak} day streak</span><span>${habit.completionRate}% this month</span></div></div>
-                            <form method="post" action="${pageContext.request.contextPath}/checkins" class="checkin-form"><input type="hidden" name="habitId" value="${habit.id}"><button class="check-btn ${habit.completedToday ? 'checked' : ''}" title="${habit.completedToday ? 'Undo check-in' : 'Mark complete'}">${habit.completedToday ? '✓' : '○'}</button></form>
+                            <form method="post" action="${pageContext.request.contextPath}/checkins" class="checkin-form"><input type="hidden" name="habitId" value="${habit.id}"><button class="check-btn ${habit.completedToday ? 'checked' : ''}" title="${not habit.scheduledToday ? 'Not scheduled today' : (habit.completedToday ? 'Undo check-in' : 'Mark complete')}" <c:if test="${not habit.scheduledToday}">disabled</c:if>>${habit.completedToday ? '✓' : '○'}</button></form>
                             <button class="delete-btn" data-id="${habit.id}" title="Delete habit">×</button>
                         </article>
                     </c:forEach>
