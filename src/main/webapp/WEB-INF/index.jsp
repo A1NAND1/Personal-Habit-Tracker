@@ -61,7 +61,7 @@
 
         <section class="insight"><div class="insight-symbol">✦</div><div><strong>Consistency insight</strong><p><c:choose><c:when test="${stats.completedToday > 0}">You’re already in motion today. One more check-in keeps your identity strong.</c:when><c:otherwise>Every journey begins with one check-in. What will you complete first?</c:otherwise></c:choose></p></div></section>
 
-        <footer>HabitFlow · Built with Java, Servlets, JDBC &amp; H2 <span>•</span> Make progress visible.</footer>
+        <footer>HabitFlow · Built with Java, Servlets, JDBC &amp; ${databaseType} <span>•</span> Make progress visible.</footer>
     </main>
 </div>
 

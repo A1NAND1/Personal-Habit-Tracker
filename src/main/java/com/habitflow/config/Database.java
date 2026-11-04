@@ -12,7 +12,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-// JDBC: opens H2 connections and loads the schema during startup.
+// JDBC: connects to H2 locally or PostgreSQL in production.
 public final class Database {
     private Database() {
     }
