@@ -1,6 +1,8 @@
 # Personal Habit Tracker
 
-**Live website:** Not deployed yet. Deployment needs the repository owner's Render and Neon accounts.
+> **[Open the live demo](https://personal-habit-tracker-3vv1.onrender.com/)**
+
+**Live website:** [https://personal-habit-tracker-3vv1.onrender.com/](https://personal-habit-tracker-3vv1.onrender.com/)
 
 Personal Habit Tracker is a Java web app for creating habits and recording daily check-ins. The dashboard shows streaks and recent progress. The page also adjusts for smaller screens. The name displayed in the app is HabitFlow.
 
