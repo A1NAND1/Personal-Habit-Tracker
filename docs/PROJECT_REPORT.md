@@ -1,78 +1,59 @@
 # Personal Habit Tracker - Project Report
 
-## 1. Introduction
+## Introduction
 
-This project is a Java web app for keeping track of daily habits. A user can create a habit, choose how often it should happen, and record a check-in. The dashboard shows the user's progress. The app is called HabitFlow in the web interface.
+Personal Habit Tracker is a Java web app for saving habits and recording which days they are completed. The dashboard shows a user's streaks and progress. HabitFlow is the name shown on the page.
 
-## 2. Problem statement
+## Problem
 
-It can be hard to remember which habits were completed on each day. This app keeps the habit list and check-in history together so the user can review progress.
+People can forget which habits they completed or how regularly they followed a routine. This app keeps the habit list and check-in dates in a database so that progress can be reviewed later.
 
-## 3. Objectives
+## Objectives
 
-- Add habits with a category and schedule.
+- Add habits with a category and repeat schedule.
 - Save one check-in for a habit on each date.
-- Show streaks, weekly check-ins, and recent completion rate.
-- Store the data in a relational database.
-- Use Java concepts such as classes, inheritance, collections, exceptions, JDBC, and Servlets.
+- Show current streak, best streak, weekly check-ins, and completion rate.
+- Practise Java OOP, collections, exceptions, JDBC, Servlets, and JSP.
 
-## 4. Scope
+## Tools and technologies
 
-This version is designed for one user running the app locally. It does not have user accounts, online syncing, or reminders.
+- Java 17 and Maven
+- Jakarta Servlets 6.0 and JSP 3.1
+- Apache Tomcat 10.1
+- JDBC with H2 for local work and PostgreSQL for online hosting
+- HTML, CSS, JavaScript, and JSTL
 
-## 5. Tools used
+## Project structure
 
-- Java 17
-- Jakarta Servlets and JSP
-- JDBC and H2 Database
-- Maven
-- HTML, CSS, and JavaScript
-- Apache Tomcat 10.1 or newer
+Servlet classes receive browser requests. `DashboardServlet` loads the habit list and dashboard totals, then forwards them to `index.jsp`. `HabitService` checks form values and coordinates the operations. `HabitDao` defines the database work, and `JdbcHabitDao` runs SQL with prepared statements. `Database` opens connections and applies the schema when the app starts.
 
-## 6. How the app is organized
+The schedule classes represent daily, weekday, and weekly habits. `HabitScheduleFactory` selects a schedule based on the frequency saved for a habit. `HabitMetrics` calculates streaks and completion rates from check-in dates.
 
-1. The Servlets receive requests from the browser.
-2. index.jsp displays the dashboard.
-3. HabitService checks input and runs habit operations.
-4. HabitDao describes the database operations, and JdbcHabitDao runs the SQL.
-5. Database opens H2 connections and loads the schema when the app starts.
+## Database
 
-AppContextListener creates the service when Tomcat starts the app. It also closes the service's background executor when the app stops.
+The app has a `habits` table and a `habit_checkins` table. Each check-in belongs to one habit. A unique key on the habit and date stops duplicate check-ins. Deleting a habit also deletes its check-ins.
 
-## 7. Java concepts used
+For local use, H2 saves data to a file in Tomcat's `data` folder. For hosting, the app connects to PostgreSQL using environment variables so that saved data does not depend on the web server's temporary disk.
 
-- **OOP and inheritance:** Daily, weekday, and weekly schedules extend HabitSchedule and have their own schedule rules.
-- **Factory:** HabitScheduleFactory creates the right schedule from the selected frequency.
-- **Collections:** Lists, maps, and sets hold habit records and check-in dates.
-- **JDBC:** Prepared statements send values to the database. Try-with-resources closes database objects.
-- **Exceptions:** HabitValidationException is used when a form value is not valid.
-- **Threads:** CompletableFuture runs dashboard statistics on a small executor.
-- **Synchronization:** ReentrantReadWriteLock controls access to the shared service.
-- **Servlets:** DashboardServlet, HabitServlet, and CheckInServlet handle browser requests.
-
-## 8. Database
-
-There are two tables: habits and habit_checkins. One habit can have multiple check-ins. The database has a unique key on the habit and date, so duplicate check-ins are not stored. A foreign key removes check-ins when their habit is deleted. More details are in [Database Design](DATABASE_DESIGN.md).
-
-## 9. Main steps for a user
+## Main user steps
 
 1. Open the dashboard.
-2. Add a habit and choose its category and schedule.
-3. Mark the habit complete on a scheduled day.
-4. Check the streak and weekly progress.
-5. Undo a check-in or delete a habit if needed.
+2. Add a habit and choose a category and schedule.
+3. Mark the habit complete when it is due.
+4. Review streaks and weekly progress.
+5. Undo a check-in or delete a habit when needed.
 
-## 10. Limitations and next steps
+## Team members
 
-The project runs locally and is for one user. In a later version, we could add user accounts, reminders, a calendar view, and CSV export.
+- **Shaswat Gupta:** OOP models: `Habit.java`, `HabitMetrics.java`, `HabitStats.java`, `HabitSchedule.java`, `DailySchedule.java`, `WeekdaySchedule.java`, `WeeklySchedule.java`, and `HabitScheduleFactory.java`.
+- **Saransh Mishra:** Database schema (`schema.sql`), JDBC configuration (`Database.java`, `AppContextListener.java`), and DAO classes (`HabitDao.java`, `JdbcHabitDao.java`).
+- **Ayush Sharma:** Service validation, exception handling, collections, and tests (`HabitService.java`, `HabitValidationException.java`, `HabitServiceTest.java`).
+- **Shivansh Singh:** Servlets and web UI (`HabitServlet.java`, `DashboardServlet.java`, `CheckInServlet.java`, `HealthServlet.java`, `index.jsp`, `styles.css`, `app.js`).
 
-## 11. Team members
+## Scope and limitations
 
-- **Shaswat Gupta:** OOP models: Habit.java, HabitMetrics.java, HabitStats.java, HabitSchedule.java, DailySchedule.java, WeekdaySchedule.java, WeeklySchedule.java, and HabitScheduleFactory.java.
-- **Saransh Mishra:** Database schema (schema.sql), JDBC configuration (Database.java, AppContextListener.java), and DAO files (HabitDao.java, JdbcHabitDao.java).
-- **Ayush Sharma:** Service validation, exception handling, collections, and testing (HabitService.java, HabitValidationException.java, HabitServiceTest.java).
-- **Shivansh Singh:** Servlets and web UI (HabitServlet.java, DashboardServlet.java, CheckInServlet.java, index.jsp, styles.css, app.js).
+The app does not have user accounts. If it is deployed publicly, everyone visiting it sees and can change the same habit list. It is suitable as a class project demo, not for storing private information. Render's free web service can sleep when idle, while the separate PostgreSQL database keeps the saved records.
 
-## 12. Conclusion
+## Conclusion
 
-We built a habit tracker with a Java web layer and an H2 database. The project helped us practise OOP, collections, exception handling, JDBC, and Servlets.
+This project combines a Java web interface with a relational database. It gave the team practice with Java classes, schedule rules, collections, input validation, JDBC queries, Servlets, and JSP.

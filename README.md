@@ -1,65 +1,105 @@
 # Personal Habit Tracker
 
-## Project overview
+**Live website:** Not deployed yet. Deployment needs the repository owner's Render and Neon accounts.
 
-This is our Java subject project. It is a small web app where a user can add habits and mark them complete each day. The dashboard shows streaks and recent progress. The app name shown in the interface is HabitFlow.
+Personal Habit Tracker is a Java web app for creating habits and recording daily check-ins. The dashboard shows streaks and recent progress. The page also adjusts for smaller screens. The name displayed in the app is HabitFlow.
 
-The project uses Java Servlets and JSP for the web pages. JDBC connects the app to an H2 database. Maven builds the project, and Tomcat runs it.
+This is a Java subject project built with Servlets, JSP, JDBC, and Maven.
 
-## Main features
+## Features
 
-- Add a habit with a name, description, category, frequency, and color.
-- Set a habit to repeat every day, on weekdays, or once a week.
-- Mark a habit complete for today or undo the check-in.
-- View current streaks, best streaks, weekly check-ins, and completion rate.
-- Save habits and check-ins in a local H2 database.
+- Add a habit with a category, schedule, description, and accent color.
+- Choose a daily, weekday, or weekly schedule.
+- Record or undo today's check-in.
+- See current and best streaks, weekly check-ins, and completion rate.
+- Delete habits and their check-in history.
+- Use a local H2 database or a hosted PostgreSQL database.
 
-## Requirements
+## Technology
 
-- JDK 17 or newer
-- Maven 3.9 or newer
-- Apache Tomcat 10.1 or newer
+- Java 17
+- Maven
+- Jakarta Servlet 6.0 and JSP 3.1
+- Apache Tomcat 10.1
+- JDBC
+- H2 for local runs; PostgreSQL for deployment
+- HTML, CSS, JavaScript, and JSTL
 
-## Run the project
+## Run locally
 
-Open a terminal in this folder and build the WAR file:
+Install JDK 17 and Maven 3.9 or newer. Build the app and run its tests:
 
-    mvn clean package
+```sh
+mvn clean verify
+```
 
-Copy target/habitflow.war into Tomcat's webapps folder and start Tomcat. On Windows, use bin\startup.bat to start it and bin\shutdown.bat to stop it. Then open:
+This creates `target/habitflow.war`. Copy it into the `webapps` folder of Tomcat 10.1 and start Tomcat. Open `http://localhost:8080/habitflow/`.
 
-    http://localhost:8080/habitflow/
+By default, the app creates an H2 database under Tomcat's `data/habitflow` folder. The database file stays on disk between restarts. You can choose another folder with `APP_DATA_DIR`. For example, set it to `D:/habit-tracker-data` on Windows or `/var/lib/habit-tracker` on Linux before starting Tomcat.
 
-The app creates the database and tables on its first run. The local database files are stored in data/.
+For a local Docker image, run:
+
+```sh
+docker build -t personal-habit-tracker .
+docker run --rm -p 10000:10000 -e PORT=10000 -e APP_DATA_DIR=/data -v habit-tracker-data:/data personal-habit-tracker
+```
+
+Open `http://localhost:10000/` after the container starts.
+
+## Database configuration
+
+Local development uses H2 and does not need a database account. The schema is in `src/main/resources/schema.sql` and is applied when the web app starts.
+
+Production mode requires PostgreSQL. Set these environment variables on the hosting service:
+
+| Variable | Value |
+| --- | --- |
+| `APP_ENV` | `production` |
+| `JDBC_URL` | `jdbc:postgresql://HOST/DATABASE?sslmode=require&prepareThreshold=0` |
+| `JDBC_USER` | PostgreSQL role name |
+| `JDBC_PASSWORD` | PostgreSQL role password |
+
+The database password belongs in the hosting provider's secret settings, not in this repository. `prepareThreshold=0` is set when using a hosted connection pooler.
+
+## Deploy on Render and Neon
+
+The repository includes a Dockerfile and `render.yaml` for a Render Docker web service. The container builds a Java 17 WAR and runs it on Tomcat 10.1. Render uses the `/health` endpoint to check that the app is ready.
+The hosted app uses the India time zone for its daily check-ins.
+
+To deploy it:
+
+1. Create a PostgreSQL project in [Neon](https://neon.com/). In the Connect panel, select the database and copy the pooled connection details. The current free plan lists 1 GB of database storage and 100 CU-hours per month.
+2. In Render, create a Blueprint from this public GitHub repository and choose the free web service plan.
+3. When Render asks for the secret values from `render.yaml`, enter `JDBC_URL`, `JDBC_USER`, and `JDBC_PASSWORD`. Build the JDBC URL from the Neon host and database name using the format above. Enter the database role and password separately. Do not include those credentials in the URL or repository.
+4. Wait for Render's build and health check to pass. Copy the URL shown on the service dashboard and add it to the top of this README only after opening it and confirming that the app loads.
+
+Render's free web service sleeps after 15 minutes without a request and can take about a minute to wake up. Its local disk is temporary, so the app uses Neon for records that should stay after redeploys and restarts. Free hosting is suitable for a class demo and does not provide a production uptime guarantee. See [Render free plan details](https://render.com/docs/free), [Neon free plan details](https://neon.com/blog/neon-free-plan-1-gb-per-project), and [Render Blueprints](https://render.com/docs/blueprint-spec).
+
+## Public demo note
+
+This version does not have user accounts. A public deployment shares one habit list with everyone who visits it, and visitors can add or delete habits. Do not store private information in a public demo.
 
 ## Project folders
 
-    src/main/java/com/habitflow/
-      config/       Database connection and app startup
-      dao/          Database interface and JDBC code
-      model/        Habit data, schedules, and progress calculations
-      service/      Validation and habit operations
-      servlet/      Web request handlers
-    src/main/resources/schema.sql
-    src/main/webapp/
-    docs/
-
-## Java topics in this project
-
-- **OOP:** HabitSchedule has daily, weekday, and weekly schedule classes. The factory selects a schedule.
-- **Interfaces:** HabitDao separates the service from the database implementation.
-- **Collections:** Lists, maps, and sets store habits and their check-in dates.
-- **JDBC:** JdbcHabitDao uses prepared statements to read and update the H2 database.
-- **Servlets and JSP:** Servlets handle requests and index.jsp displays the dashboard.
-- **Exceptions:** The service checks input and reports invalid values with HabitValidationException.
-- **Threads and locks:** Dashboard statistics use CompletableFuture; a read-write lock protects shared service operations.
+```text
+src/main/java/com/habitflow/
+  config/       Database connection and startup listener
+  dao/          Database interface and JDBC implementation
+  model/        Habit data, schedules, and progress calculations
+  service/      Input validation and habit operations
+  servlet/      Dashboard and form request handlers
+src/main/resources/schema.sql
+src/main/webapp/              JSP page, CSS, and JavaScript
+src/test/java/                Service and JDBC tests
+docs/                         Project report and database design
+```
 
 ## Team members
 
-- **Shaswat Gupta:** OOP models: Habit.java, HabitMetrics.java, HabitStats.java, HabitSchedule.java, DailySchedule.java, WeekdaySchedule.java, WeeklySchedule.java, and HabitScheduleFactory.java.
-- **Saransh Mishra:** Database schema (schema.sql), JDBC configuration (Database.java, AppContextListener.java), and DAO files (HabitDao.java, JdbcHabitDao.java).
-- **Ayush Sharma:** Service validation, exception handling, collections, and testing (HabitService.java, HabitValidationException.java, HabitServiceTest.java).
-- **Shivansh Singh:** Servlets and web UI (HabitServlet.java, DashboardServlet.java, CheckInServlet.java, index.jsp, styles.css, app.js).
+- **Shaswat Gupta:** OOP models and schedule classes.
+- **Saransh Mishra:** Database schema, JDBC configuration, and DAO classes.
+- **Ayush Sharma:** Service validation, exception handling, collections, and tests.
+- **Shivansh Singh:** Servlets and web UI.
 
 ## Project documents
 
