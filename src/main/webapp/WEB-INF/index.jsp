@@ -3,7 +3,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#F8FAFC">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FAF8F3">
 <title>HabitFlow | Personal habit tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
 <div class="app-shell">
 <aside class="sidebar">
     <div class="sidebar-brand"><a class="brand" href="${pageContext.request.contextPath}/"><span class="brand-mark">H</span><span>Habit<span class="brand-flow">Flow</span></span></a>
-        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Change theme"><svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8.5 8.5 0 0 1 9 4a8.5 8.5 0 1 0 11 11Z"/></svg><svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg></button>
+        <button class="theme-toggle" id="theme-toggle" data-theme-toggle type="button" aria-label="Switch to dark mode" title="Change theme"><svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8.5 8.5 0 0 1 9 4a8.5 8.5 0 1 0 11 11Z"/></svg><svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg></button>
     </div>
     <p class="side-label">WORKSPACE</p>
     <nav class="side-nav" aria-label="Main navigation">
@@ -25,7 +25,7 @@
     <div class="sidebar-profile"><div class="profile-avatar">A</div><div class="profile-copy"><strong>My routine</strong><span>Personal workspace</span></div><span class="profile-count">${stats.totalHabits} active</span></div>
 </aside>
 <main class="content">
-    <div class="mobile-topbar"><a class="brand" href="${pageContext.request.contextPath}/"><span class="brand-mark">H</span><span>Habit<span class="brand-flow">Flow</span></span></a><div class="mobile-top-actions"><span class="mobile-done">${stats.completedToday}/${stats.totalHabits} done</span><button type="button" onclick="openModal()" aria-label="Add a habit">＋</button></div></div>
+    <div class="mobile-topbar"><a class="brand" href="${pageContext.request.contextPath}/"><span class="brand-mark">H</span><span>Habit<span class="brand-flow">Flow</span></span></a><div class="mobile-top-actions"><span class="mobile-done">${stats.completedToday}/${stats.totalHabits} done</span><button class="theme-toggle mobile-theme-toggle" data-theme-toggle type="button" aria-label="Switch to dark mode" title="Change theme"><svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8.5 8.5 0 0 1 9 4a8.5 8.5 0 1 0 11 11Z"/></svg><svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg></button><button type="button" onclick="openModal()" aria-label="Add a habit">＋</button></div></div>
     <header class="page-header"><div><p class="eyebrow">${todayDay}, ${today}</p><h1>Good morning, achiever</h1><p class="page-subtitle">Make today count, one habit at a time.</p></div><div class="header-actions"><div class="date-pill"><span class="date-dot"></span><span id="live-date"></span></div><button class="primary-btn" type="button" onclick="openModal()"><span>＋</span> New habit</button></div></header>
     <c:if test="${not empty param.message or not empty param.error}"><div class="alert-banner ${not empty param.error ? 'alert-error' : 'alert-success'}" id="flash-banner" role="status"><span class="alert-symbol">${not empty param.error ? '!' : '✓'}</span><span class="alert-copy"><c:out value="${not empty param.error ? param.error : param.message}" /></span><button type="button" class="alert-dismiss" aria-label="Dismiss message">×</button></div></c:if>
     <section class="workspace-view active" id="view-dashboard">

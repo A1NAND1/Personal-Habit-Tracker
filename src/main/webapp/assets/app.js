@@ -91,7 +91,7 @@
             (doneFor(card, key) ? ' done' : '') + (todayTile ? ' today' : '');
         button.disabled = !scheduled;
         button.dataset.day = key;
-        button.style.setProperty('--cell-color', card.dataset.color || '#5B5FEF');
+        button.style.setProperty('--cell-color', card.dataset.color || '#D41514');
         button.setAttribute('aria-label', card.querySelector('.habit-title').textContent + ', ' +
             dayLabel(date) + ' ' + date.getDate() + (doneFor(card, key) ? ', completed' : ', not completed'));
         if (matrix) {
@@ -111,7 +111,7 @@
     }
     function drawWeeks() {
         cards.forEach(function (card) {
-            card.style.setProperty('--card-accent', card.dataset.color || '#5B5FEF');
+            card.style.setProperty('--card-accent', card.dataset.color || '#D41514');
             const strip = card.querySelector('.week-strip');
             if (strip) {
                 strip.replaceChildren();
@@ -210,7 +210,7 @@
             name.className = 'matrix-habit-name';
             const dot = document.createElement('i');
             dot.className = 'matrix-habit-dot';
-            dot.style.background = card.dataset.color || '#5B5FEF';
+            dot.style.background = card.dataset.color || '#D41514';
             const text = document.createElement('span');
             text.textContent = card.querySelector('.habit-title').textContent;
             name.append(dot, text);
@@ -283,7 +283,7 @@
 
         const categoryRoot = document.getElementById('category-breakdown');
         categoryRoot.replaceChildren();
-        const categoryColors = { Mind: '#7C3AED', Body: '#F08C46', Career: '#5B5FEF', Wellness: '#0FA77A', Learning: '#2583D8' };
+        const categoryColors = { Mind: '#7C3AED', Body: '#F08C46', Career: '#D41514', Wellness: '#0FA77A', Learning: '#2583D8' };
         ['Mind', 'Body', 'Career', 'Wellness', 'Learning'].forEach(function (category) {
             const count = cards.filter(function (card) { return card.dataset.category === category; }).length;
             const row = document.createElement('div');
@@ -391,6 +391,12 @@
         if (view === 'analytics') renderAnalytics();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    function syncThemeColor() {
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) {
+            themeMeta.content = document.documentElement.classList.contains('dark') ? '#080808' : '#FAF8F3';
+        }
+    }
     window.openModal = function () {
         const modal = document.getElementById('habit-modal');
         modal.classList.add('open');
@@ -409,10 +415,19 @@
     document.querySelectorAll('[data-open-view]').forEach(function (button) {
         button.addEventListener('click', function () { switchView(button.dataset.openView); });
     });
-    document.getElementById('theme-toggle').addEventListener('click', function () {
-        const dark = document.documentElement.classList.toggle('dark');
-        this.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-        writeStore('habitflow-theme', dark ? 'dark' : 'light');
+    document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const dark = document.documentElement.classList.toggle('dark');
+            document.querySelectorAll('[data-theme-toggle]').forEach(function (toggle) {
+                toggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+            });
+            syncThemeColor();
+            try {
+                localStorage.setItem('habitflow-theme', dark ? 'dark' : 'light');
+            } catch (error) {
+                announce('Theme preference could not be saved in this browser.');
+            }
+        });
     });
     document.querySelectorAll('[data-category-filter]').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -643,8 +658,13 @@
         announce('Routine data exported.');
     });
 
-    const existingTheme = readStore('habitflow-theme', 'light');
-    if (existingTheme === 'dark') document.getElementById('theme-toggle').setAttribute('aria-label', 'Switch to light mode');
+    let existingTheme = 'light';
+    try { existingTheme = localStorage.getItem('habitflow-theme') || 'light'; }
+    catch (error) { /* The saved theme is optional. */ }
+    document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+        if (existingTheme === 'dark') button.setAttribute('aria-label', 'Switch to light mode');
+    });
+    syncThemeColor();
     updateTimer();
     renderAll();
 })();
