@@ -18,6 +18,7 @@
     });
     let activeCategory = 'All';
     let activeTime = 'All';
+    let matrixWindow = 7;
     let timerMinutes = 25;
     let timerRemaining = timerMinutes * 60;
     let timerElapsed = 0;
@@ -143,6 +144,29 @@
             if (row) row.classList.add('target-idle');
         }
     }
+    function renderNoteHistory(card) {
+        const root = card.querySelector('.note-history');
+        if (!root) return;
+        root.replaceChildren();
+        const notes = metaFor(card.dataset.habitId).notes || {};
+        Object.keys(notes).filter(function (key) { return notes[key]; }).sort().reverse().forEach(function (key) {
+            const entry = document.createElement('article');
+            entry.className = 'note-history-entry';
+            const date = document.createElement('time');
+            date.dateTime = key;
+            date.textContent = new Date(key + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' });
+            const text = document.createElement('p');
+            text.textContent = notes[key];
+            entry.append(date, text);
+            root.appendChild(entry);
+        });
+        if (!root.children.length) {
+            const empty = document.createElement('p');
+            empty.className = 'note-history-empty';
+            empty.textContent = 'No notes recorded yet. Add your first reflection above.';
+            root.appendChild(empty);
+        }
+    }
     function updateFocusBadge(card) {
         const badge = card.querySelector('.focus-badge');
         const minutes = Number(focusData.byHabit[card.dataset.habitId]) || 0;
@@ -167,13 +191,18 @@
     function renderMatrix() {
         const table = document.getElementById('matrix-table');
         if (!table) return;
+        const matrixDates = Array.from({ length: matrixWindow }, function (_, index) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - (matrixWindow - index - 1));
+            return date;
+        });
         table.replaceChildren();
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
         const habitHeading = document.createElement('th');
         habitHeading.textContent = 'Habit';
         headerRow.appendChild(habitHeading);
-        weekDates.forEach(function (date) {
+        matrixDates.forEach(function (date) {
             const th = document.createElement('th');
             if (dateKey(date) === todayKey) th.className = 'today-col';
             const name = document.createElement('span');
@@ -194,7 +223,7 @@
         if (!cards.length) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = 9;
+            cell.colSpan = matrixDates.length + 2;
             cell.className = 'empty-matrix';
             cell.textContent = 'Create a habit to see your weekly matrix.';
             row.appendChild(cell);
@@ -216,7 +245,7 @@
             name.append(dot, text);
             nameCell.appendChild(name);
             row.appendChild(nameCell);
-            weekDates.forEach(function (date) {
+            matrixDates.forEach(function (date) {
                 const cell = document.createElement('td');
                 cell.appendChild(dayButton(card, date, true));
                 row.appendChild(cell);
@@ -233,7 +262,7 @@
         const title = document.createElement('td');
         title.textContent = 'Daily completion';
         summary.appendChild(title);
-        weekDates.forEach(function (date) {
+        matrixDates.forEach(function (date) {
             const cell = document.createElement('td');
             cell.className = 'summary-count';
             const key = dateKey(date);
@@ -278,37 +307,44 @@
         }, 0);
         document.getElementById('consistency-score').textContent =
             (scheduledTotal ? Math.round(completedTotal / scheduledTotal * 100) : 0) + '%';
-        document.getElementById('focus-total').textContent = (Number(focusData.totalMinutes) || 0) + ' min';
+        const todayScheduled = cards.filter(function (card) { return isScheduled(card, today); }).length;
+        const todayCompleted = cards.filter(function (card) { return isScheduled(card, today) && doneFor(card, todayKey); }).length;
+        document.getElementById('analytics-today-rate').textContent =
+            (todayScheduled ? Math.round(todayCompleted / todayScheduled * 100) : 0) + '%';
         document.getElementById('timer-side-total').textContent = (Number(focusData.totalMinutes) || 0) + ' min';
 
         const categoryRoot = document.getElementById('category-breakdown');
         categoryRoot.replaceChildren();
         const categoryColors = { Mind: '#7C3AED', Body: '#F08C46', Career: '#D41514', Wellness: '#0FA77A', Learning: '#2583D8' };
         ['Mind', 'Body', 'Career', 'Wellness', 'Learning'].forEach(function (category) {
-            const count = cards.filter(function (card) { return card.dataset.category === category; }).length;
+            const categoryCards = cards.filter(function (card) { return card.dataset.category === category; });
+            const count = categoryCards.length;
+            const averageRate = count ? Math.round(categoryCards.reduce(function (sum, card) {
+                return sum + rate(card);
+            }, 0) / count) : 0;
             const row = document.createElement('div');
             row.className = 'category-row';
             const label = document.createElement('span');
-            label.textContent = category;
+            label.textContent = category + ' (' + count + (count === 1 ? ' habit' : ' habits') + ')';
             const track = document.createElement('span');
             track.className = 'category-track';
             const fill = document.createElement('span');
-            fill.style.width = (cards.length ? Math.round(count / cards.length * 100) : 0) + '%';
+            fill.style.width = averageRate + '%';
             fill.style.setProperty('--bar-color', categoryColors[category]);
             track.appendChild(fill);
             const value = document.createElement('strong');
-            value.textContent = String(count);
+            value.textContent = averageRate + '%';
             row.append(label, track, value);
             categoryRoot.appendChild(row);
         });
 
         const leaderboard = document.getElementById('leaderboard');
         leaderboard.replaceChildren();
-        const ranked = cards.slice().sort(function (a, b) { return rate(b) - rate(a); });
+        const ranked = cards.slice().sort(function (a, b) { return streak(b) - streak(a); });
         if (!ranked.length) {
             const empty = document.createElement('p');
             empty.className = 'storage-note';
-            empty.textContent = 'Add habits to start your leaderboard.';
+            empty.textContent = 'Add habits to start your streak leaderboard.';
             leaderboard.appendChild(empty);
         }
         ranked.forEach(function (card, index) {
@@ -321,11 +357,16 @@
             name.className = 'leader-name';
             name.textContent = card.querySelector('.habit-title').textContent;
             const score = document.createElement('strong');
-            score.textContent = rate(card) + '%';
+            score.textContent = streak(card) + ' days';
             row.append(rank, name, score);
             leaderboard.appendChild(row);
         });
         renderHeatmap();
+        render28DayHeatmap();
+    }
+    function streak(card) {
+        const match = card.querySelector('.habit-meta').textContent.match(/♨\s*(\d+)d/);
+        return match ? Number(match[1]) : 0;
     }
     function rate(card) {
         const match = card.querySelector('.habit-meta').textContent.match(/(\d+)%\s*month/);
@@ -356,6 +397,27 @@
             cell.className = 'heat-cell' + (level ? ' level-' + level : '') + (date > today ? ' empty' : '');
             cell.title = date.toLocaleDateString('en', { month: 'short', day: 'numeric' }) + ': ' + count + ' habits completed';
             root.appendChild(cell);
+        }
+    }
+    function render28DayHeatmap() {
+        const root = document.getElementById('intensity-heatmap');
+        if (!root) return;
+        root.replaceChildren();
+        for (let offset = 27; offset >= 0; offset--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - offset);
+            const scheduled = cards.filter(function (card) { return isScheduled(card, date); });
+            const completed = scheduled.filter(function (card) { return doneFor(card, dateKey(date)); }).length;
+            const percent = scheduled.length ? Math.round(completed / scheduled.length * 100) : 0;
+            const tile = document.createElement('div');
+            tile.className = 'intensity-tile' + (percent >= 80 ? ' level-4' : percent >= 50 ? ' level-3' : percent >= 25 ? ' level-2' : percent > 0 ? ' level-1' : '');
+            tile.title = date.toLocaleDateString('en', { month: 'short', day: 'numeric' }) + ': ' + completed + '/' + scheduled.length + ' habits completed';
+            const month = document.createElement('span');
+            month.textContent = date.toLocaleDateString('en', { month: 'short' });
+            const day = document.createElement('strong');
+            day.textContent = String(date.getDate());
+            tile.append(month, day);
+            root.appendChild(tile);
         }
     }
     function renderAll() {
@@ -394,7 +456,7 @@
     function syncThemeColor() {
         const themeMeta = document.querySelector('meta[name="theme-color"]');
         if (themeMeta) {
-            themeMeta.content = document.documentElement.classList.contains('dark') ? '#080808' : '#FAF8F3';
+            themeMeta.content = document.documentElement.classList.contains('dark') ? '#080808' : '#F7F6F2';
         }
     }
     window.openModal = function () {
@@ -411,6 +473,18 @@
 
     document.querySelectorAll('[data-view]').forEach(function (button) {
         button.addEventListener('click', function () { switchView(button.dataset.view); });
+    });
+    document.querySelectorAll('[data-matrix-days]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            matrixWindow = Number(button.dataset.matrixDays) === 14 ? 14 : 7;
+            document.querySelectorAll('[data-matrix-days]').forEach(function (option) {
+                const active = Number(option.dataset.matrixDays) === matrixWindow;
+                option.classList.toggle('active', active);
+                option.setAttribute('aria-pressed', String(active));
+            });
+            document.getElementById('matrix-window-label').textContent = matrixWindow + ' DAYS';
+            renderMatrix();
+        });
     });
     document.querySelectorAll('[data-open-view]').forEach(function (button) {
         button.addEventListener('click', function () { switchView(button.dataset.openView); });
@@ -465,10 +539,30 @@
     });
     document.querySelectorAll('.note-toggle').forEach(function (button) {
         button.addEventListener('click', function () {
-            const drawer = button.closest('.habit-card').querySelector('.note-drawer');
-            drawer.hidden = !drawer.hidden;
-            if (!drawer.hidden) drawer.querySelector('textarea').focus();
+            const card = button.closest('.habit-card');
+            const drawer = card.querySelector('.note-drawer');
+            const shouldOpen = drawer.hidden;
+            document.querySelectorAll('.note-drawer').forEach(function (other) { other.hidden = true; });
+            drawer.querySelector('.note-habit-name').textContent = card.querySelector('.habit-title').textContent;
+            drawer.hidden = !shouldOpen;
+            if (!drawer.hidden) {
+                renderNoteHistory(card);
+                drawer.querySelector('textarea').focus();
+            }
         });
+    });
+    document.querySelectorAll('.note-close').forEach(function (button) {
+        button.addEventListener('click', function () { button.closest('.note-drawer').hidden = true; });
+    });
+    document.querySelectorAll('.note-drawer').forEach(function (drawer) {
+        drawer.addEventListener('click', function (event) {
+            if (event.target === drawer) drawer.hidden = true;
+        });
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Escape') return;
+        document.querySelectorAll('.note-drawer').forEach(function (drawer) { drawer.hidden = true; });
+        if (document.getElementById('habit-modal').classList.contains('open')) window.closeModal();
     });
     document.querySelectorAll('.save-note-btn').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -479,6 +573,7 @@
             item.time = card.querySelector('.time-select').value;
             writeStore('hf-metadata-v1', metadata);
             card.querySelector('.time-label').textContent = item.time;
+            renderNoteHistory(card);
             applyFilters();
             announce('Note saved in this browser.');
             button.textContent = 'Saved';
@@ -658,11 +753,11 @@
         announce('Routine data exported.');
     });
 
-    let existingTheme = 'light';
-    try { existingTheme = localStorage.getItem('habitflow-theme') || 'light'; }
+    let existingTheme = 'dark';
+    try { existingTheme = localStorage.getItem('habitflow-theme') || 'dark'; }
     catch (error) { /* The saved theme is optional. */ }
     document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
-        if (existingTheme === 'dark') button.setAttribute('aria-label', 'Switch to light mode');
+        button.setAttribute('aria-label', existingTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     });
     syncThemeColor();
     updateTimer();
