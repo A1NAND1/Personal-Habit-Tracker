@@ -58,7 +58,22 @@
 </aside>
 <main class="content">
     <div class="mobile-topbar"><a class="brand" href="${pageContext.request.contextPath}/"><span class="brand-mark">H</span><span>Habit<span class="brand-flow">Flow</span></span></a><div class="mobile-top-actions"><span class="mobile-done">${stats.completedToday}/${stats.totalHabits} done</span><button class="theme-toggle mobile-theme-toggle" data-theme-toggle type="button" aria-label="Switch to light mode" title="Change theme"><svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8.5 8.5 0 0 1 9 4a8.5 8.5 0 1 0 11 11Z"/></svg><svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg></button><button type="button" onclick="openModal()" aria-label="Add a habit">＋</button></div></div>
-    <header class="page-header"><div><p class="eyebrow">${todayDay}, ${today}</p><h1>Good morning, achiever 👋</h1><p class="page-subtitle">Make today count, one habit at a time.</p></div><div class="header-actions"><div class="date-pill"><span class="date-dot"></span><span id="live-date"></span></div><button class="primary-btn" type="button" onclick="openModal()"><span class="primary-icon">＋</span><span class="primary-label">New habit</span></button></div></header>
+    <header class="page-header"><div><p class="eyebrow">${todayDay}, ${today}</p><h1>Good morning, achiever 👋</h1><div class="hf-compound-tagline" style="margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; letter-spacing: 0.03em;">
+      <svg viewBox="0 0 24 18" fill="none" aria-hidden="true" style="width: 24px; height: 18px; flex-shrink: 0;">
+        <defs>
+          <linearGradient id="hfTrendArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#EF2323" stop-opacity="0.42" />
+            <stop offset="100%" stop-color="#EF2323" stop-opacity="0.0" />
+          </linearGradient>
+        </defs>
+        <path d="M2 14.5 L8.5 9.5 L13 12.5 L21.5 3.5 L21.5 16.5 L2 16.5 Z" fill="url(#hfTrendArea)" />
+        <path d="M2 14.5 L8.5 9.5 L13 12.5 L21.5 3.5" stroke="#EF2323" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M16.5 3.5 H21.5 V8.5" stroke="#EF2323" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span style="text-transform: uppercase; letter-spacing: 0.04em;">1% BETTER EVERY DAY</span>
+      <span aria-hidden="true" style="width: 1.5px; height: 16px; background: currentColor; opacity: 0.35; margin: 0 4px;"></span>
+      <span style="font-variant-numeric: tabular-nums; letter-spacing: -0.01em;">1.01<sup style="font-size: 0.68em; font-weight: 800; margin-left: 1px;">365</sup> = 37.78&times;</span>
+    </div></div><div class="header-actions"><div class="date-pill"><span class="date-dot"></span><span id="live-date"></span></div><button class="primary-btn" type="button" onclick="openModal()"><span class="primary-icon">＋</span><span class="primary-label">New habit</span></button></div></header>
     <c:if test="${not empty param.message or not empty param.error}"><div class="alert-banner ${not empty param.error ? 'alert-error' : 'alert-success'}" id="flash-banner" role="status"><span class="alert-symbol">${not empty param.error ? '!' : '✓'}</span><span class="alert-copy"><c:out value="${not empty param.error ? param.error : param.message}" /></span><button type="button" class="alert-dismiss" aria-label="Dismiss message">×</button></div></c:if>
     <section class="workspace-view active" id="view-dashboard">
         <div class="stats-grid">
