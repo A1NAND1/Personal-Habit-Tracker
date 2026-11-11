@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
 <script>try { const dark = localStorage.getItem('habitflow-theme') !== 'light'; if (dark) document.documentElement.classList.add('dark'); document.querySelector('meta[name="theme-color"]').content = dark ? '#080808' : '#F8FAFC'; } catch (error) { document.documentElement.classList.add('dark'); document.querySelector('meta[name="theme-color"]').content = '#080808'; }</script>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/styles.css?v=20261111-2"><script defer src="${pageContext.request.contextPath}/assets/app.js?v=20261111-1"></script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/styles.css?v=20261111-3"><script defer src="${pageContext.request.contextPath}/assets/app.js?v=20261111-1"></script>
 </head>
 <body data-base="${pageContext.request.contextPath}/" data-weekly="${stats.weeklyCompletions}" data-total-habits="${stats.totalHabits}">
 <div class="app-shell">
@@ -21,10 +21,39 @@
         <button class="nav-link active" type="button" data-view="dashboard"><span class="nav-icon">⌂</span>Dashboard</button><button class="nav-link" type="button" data-view="matrix"><span class="nav-icon">▦</span>Weekly Matrix</button><button class="nav-link" type="button" data-view="analytics"><span class="nav-icon">↗</span>Analytics</button><button class="nav-link" type="button" data-view="timer"><span class="nav-icon">◷</span>Focus Timer</button><button class="nav-link" type="button" data-view="templates"><span class="nav-icon">◇</span>Blueprints</button>
     </nav>
     <div class="sidebar-footer">
+        <span class="sidebar-footer-glow" aria-hidden="true"></span>
         <button class="side-add" type="button" onclick="openModal()"><span>＋</span> Add a habit</button>
         <section class="momentum-card"><div class="momentum-top"><span>Daily momentum</span><strong id="momentum-percent">0%</strong></div><div class="momentum-track"><span id="momentum-fill"></span></div><p>Small steps. Consistency beats intensity. Show up today.</p></section>
         <div class="sidebar-profile"><div class="profile-avatar">A</div><div class="profile-copy"><strong>My routine</strong><span>Personal workspace</span></div><span class="profile-count">${stats.totalHabits} active</span></div>
-        <div class="sidebar-wave" aria-hidden="true"><span class="sidebar-wave-glow"></span><svg viewBox="0 0 276 96" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sidebarWaveOne" x1="0" y1="48" x2="276" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#E11D2E" stop-opacity=".05"/><stop offset=".45" stop-color="#FF2E40" stop-opacity=".85"/><stop offset="1" stop-color="#E11D2E" stop-opacity=".1"/></linearGradient><linearGradient id="sidebarWaveTwo" x1="0" y1="60" x2="276" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#FF4D5A" stop-opacity=".1"/><stop offset=".55" stop-color="#FF1F33" stop-opacity=".95"/><stop offset="1" stop-color="#991B1B" stop-opacity=".15"/></linearGradient></defs><path d="M-10 78C55 24 140 92 286 38" stroke="url(#sidebarWaveOne)" stroke-width="2.2" stroke-linecap="round"/><path d="M-10 52C75 94 165 20 286 76" stroke="url(#sidebarWaveTwo)" stroke-width="2.5" stroke-linecap="round"/><path d="M-10 86C85 52 185 84 286 58" stroke="url(#sidebarWaveOne)" stroke-width="1.2" stroke-opacity=".6"/></svg></div>
+        <div class="sidebar-wave" aria-hidden="true"><svg viewBox="0 0 280 68" fill="none" style="width: 100%; height: 100%;" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="hfWavePrimary" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="rgba(239, 35, 35, 0.16)" />
+                    <stop offset="32%" stop-color="#FF3B3B" />
+                    <stop offset="62%" stop-color="#EF2323" />
+                    <stop offset="100%" stop-color="rgba(200, 20, 20, 0.25)" />
+                </linearGradient>
+                <linearGradient id="hfWaveSecondary" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="rgba(239, 35, 35, 0.20)" />
+                    <stop offset="48%" stop-color="#EF2323" />
+                    <stop offset="100%" stop-color="rgba(239, 35, 35, 0.18)" />
+                </linearGradient>
+                <linearGradient id="hfWaveSubtle" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="rgba(239, 35, 35, 0.06)" />
+                    <stop offset="50%" stop-color="rgba(239, 35, 35, 0.48)" />
+                    <stop offset="100%" stop-color="rgba(239, 35, 35, 0.08)" />
+                </linearGradient>
+                <filter id="hfCrimsonGlow" x="-15%" y="-40%" width="130%" height="180%">
+                    <feGaussianBlur stdDeviation="2.2" result="blur" />
+                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+            </defs>
+            <path d="M-12 28 C 52 14, 118 30, 182 18 C 228 11, 258 24, 292 36 L 292 48 C 245 34, 195 24, 128 28 C 65 32, 18 42, -12 46 Z" fill="rgba(239, 35, 35, 0.09)" />
+            <path d="M-12 48 C 72 31, 178 31, 292 24" stroke="url(#hfWaveSubtle)" stroke-width="1.15" />
+            <path d="M-12 34 C 46 14, 108 28, 176 23 C 226 19, 258 11, 292 3" stroke="url(#hfWaveSecondary)" stroke-width="1.9" filter="url(#hfCrimsonGlow)" />
+            <path d="M-12 23 C 54 33, 122 10, 192 15 C 234 18, 264 28, 292 39" stroke="url(#hfWavePrimary)" stroke-width="2.5" filter="url(#hfCrimsonGlow)" />
+            <path d="M-12 18 C 62 28, 148 25, 292 33" stroke="url(#hfWaveSubtle)" stroke-width="0.9" />
+        </svg></div>
     </div>
 </aside>
 <main class="content">

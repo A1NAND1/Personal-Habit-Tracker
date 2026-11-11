@@ -145,6 +145,7 @@ html.dark .sidebar-profile{position:relative;z-index:2}
 html.dark .profile-avatar{color:#fff;background:#991B1B}
 html.dark .sidebar-wave{inset:auto 0 0;height:110px;z-index:1;overflow:hidden;background:radial-gradient(circle at 50% 100%,rgba(220,20,20,.28) 0%,transparent 72%)}
 html.dark .sidebar-wave-glow{display:none}
+html:not(.dark) .sidebar-footer .sidebar-profile{border-top:0}
 html.dark .sidebar-wave svg{height:100%;opacity:1}
 html.dark .sidebar-wave svg path:first-of-type{stroke:#FF3B30}
 html.dark .sidebar-wave svg path:nth-of-type(2){stroke:#D41514}
@@ -215,3 +216,21 @@ html.dark .sidebar-footer .momentum-card{margin:0 3px 14px}
 html.dark .sidebar-footer .sidebar-profile{margin-top:0;padding-top:12px}
 html.dark .sidebar::after{display:none}
 @media(min-width:1024px){.mobile-nav{position:static;inset:auto;z-index:auto;width:100%;margin-top:2.5rem;padding:1.5rem 0 0;justify-content:flex-start;background:transparent;border-top:1px solid var(--hf-border);backdrop-filter:none}.content{padding-bottom:36px}html.dark .content{padding-bottom:36px}}
+.sidebar,html.dark .sidebar{display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto;overflow-x:hidden;padding-bottom:0}
+.sidebar>.sidebar-brand,.sidebar>.side-label,.sidebar>.side-nav,.sidebar>.sidebar-footer{flex-shrink:0}
+.sidebar-footer{position:relative;display:flex;flex-direction:column;flex-shrink:0;margin-top:1rem;padding-top:.875rem;border-top:1px solid var(--hf-border)}
+.sidebar-footer-glow{position:absolute;left:-20px;right:-20px;bottom:0;top:-8px;z-index:0;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 50% 100%,rgba(239,35,35,.18) 0%,rgba(239,35,35,.06) 55%,transparent 85%)}
+html.dark .sidebar-footer-glow{background:radial-gradient(ellipse 85% 75% at 50% 100%,rgba(220,20,20,.36) 0%,rgba(180,15,20,.14) 55%,transparent 85%)}
+.sidebar-footer>.side-add,.sidebar-footer>.momentum-card,.sidebar-footer>.sidebar-profile,.sidebar-footer>.sidebar-wave{position:relative;z-index:10;flex-shrink:0}
+.sidebar-footer .side-add{margin:10px 0 12px}
+.sidebar-footer .momentum-card,html.dark .sidebar-footer .momentum-card{margin:0 3px 14px}
+.sidebar-footer .sidebar-profile,html.dark .sidebar-footer .sidebar-profile{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:0;border-top:0}
+.sidebar-footer .profile-avatar,html.dark .sidebar-footer .profile-avatar{width:40px;height:40px;flex:0 0 40px;color:#fff;background:linear-gradient(180deg,#CE1B22 0%,#8E0E14 100%);border-radius:9999px;box-shadow:0 3px 12px rgba(206,27,34,.26)}
+.sidebar-footer .profile-copy{flex:1;gap:3px}
+.sidebar-footer .profile-copy strong,html.dark .sidebar-footer .profile-copy strong{color:var(--hf-text);font-size:13px;font-weight:700}
+.sidebar-footer .profile-copy span,html.dark .sidebar-footer .profile-copy span{color:var(--hf-subtext);font-size:11.5px}
+.sidebar-footer .profile-count,html.dark .sidebar-footer .profile-count{margin-left:0;color:var(--hf-subtext);font:12px var(--font-mono);white-space:nowrap}
+.sidebar-wave,html.dark .sidebar-wave{position:relative;inset:auto;height:64px;flex-shrink:0;margin:4px -20px 0;overflow:hidden;pointer-events:none;z-index:10;background:none}
+.sidebar-wave svg{display:block;width:100%;height:100%}
+.sidebar-wave-glow{display:none}
+html.dark .sidebar-wave-glow{display:none}
