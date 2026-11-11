@@ -456,7 +456,7 @@
     function syncThemeColor() {
         const themeMeta = document.querySelector('meta[name="theme-color"]');
         if (themeMeta) {
-            themeMeta.content = document.documentElement.classList.contains('dark') ? '#080808' : '#F7F6F2';
+            themeMeta.content = document.documentElement.classList.contains('dark') ? '#080808' : '#F8FAFC';
         }
     }
     window.openModal = function () {
