@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
 <script>try { const dark = localStorage.getItem('habitflow-theme') !== 'light'; if (dark) document.documentElement.classList.add('dark'); document.querySelector('meta[name="theme-color"]').content = dark ? '#080808' : '#F8FAFC'; } catch (error) { document.documentElement.classList.add('dark'); document.querySelector('meta[name="theme-color"]').content = '#080808'; }</script>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/styles.css?v=20261111-3"><script defer src="${pageContext.request.contextPath}/assets/app.js?v=20261111-1"></script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/styles.css?v=20261111-4"><script defer src="${pageContext.request.contextPath}/assets/app.js?v=20261111-1"></script>
 </head>
 <body data-base="${pageContext.request.contextPath}/" data-weekly="${stats.weeklyCompletions}" data-total-habits="${stats.totalHabits}">
 <div class="app-shell">
