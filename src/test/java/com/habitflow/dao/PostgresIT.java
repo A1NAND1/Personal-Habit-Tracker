@@ -52,13 +52,14 @@ class PostgresIT {
     @Test
     void migrationsAndOwnershipConstraintsArePresent() throws Exception {
         try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement("SELECT version FROM schema_migrations WHERE version IN (?, ?)")) {
+             PreparedStatement statement = connection.prepareStatement("SELECT version FROM schema_migrations WHERE version IN (?, ?, ?)")) {
             statement.setString(1, "V001__user_accounts.sql");
             statement.setString(2, "V002__workspace_sync.sql");
+            statement.setString(3, "V003__light_theme_default.sql");
             try (var rows = statement.executeQuery()) {
                 int versions = 0;
                 while (rows.next()) versions++;
-                assertEquals(2, versions, "Both versioned migrations must be recorded");
+                assertEquals(3, versions, "All versioned migrations must be recorded");
             }
         }
 
@@ -114,6 +115,7 @@ class PostgresIT {
     void crudNotesCheckinsPreferencesTargetsFocusAndRollbackWork() throws Exception {
         var owner = newAccount("crud");
         var other = newAccount("isolation");
+        assertEquals("light", workspace.theme(owner.id()), "New accounts default to Light Mode");
         long id = habits.save(owner.id(), "Original", "Description", "Mind", "Daily", "#5B5FEF");
         habits.addCheckin(owner.id(), id, TODAY, "checked in");
         workspace.saveNote(owner.id(), id, TODAY, "saved note");
