@@ -11,14 +11,14 @@ import java.util.Set;
 // All workspace reads and writes include the authenticated owner id.
 public final class JdbcWorkspaceDao {
     public String theme(long userId) {
-        try(Connection c=Database.getConnection();PreparedStatement p=c.prepareStatement("SELECT theme FROM user_preferences WHERE user_id=?")){p.setLong(1,userId);try(ResultSet r=p.executeQuery()){if(r.next())return r.getString(1);return "dark";}}
+        try(Connection c=Database.getConnection();PreparedStatement p=c.prepareStatement("SELECT theme FROM user_preferences WHERE user_id=?")){p.setLong(1,userId);try(ResultSet r=p.executeQuery()){if(r.next())return r.getString(1);return "light";}}
         catch(SQLException e){throw new IllegalStateException("Unable to read theme",e);}
     }
     public Map<String,Object> load(long userId) {
         Map<String,Object> root=new LinkedHashMap<>(); Map<String,Boolean> done=new LinkedHashMap<>();
         Map<String,Map<String,Object>> metadata=new LinkedHashMap<>(); Map<String,Object> focus=new LinkedHashMap<>();
         Map<String,Map<String,String>> notes=new HashMap<>(); Map<String,Map<String,Object>> targets=new HashMap<>();
-        String theme="dark";
+        String theme="light";
         try(Connection c=Database.getConnection()) {
             try(PreparedStatement p=c.prepareStatement("SELECT theme FROM user_preferences WHERE user_id=?")) { p.setLong(1,userId); try(ResultSet r=p.executeQuery()){ if(r.next()) theme=r.getString(1); } }
             try(PreparedStatement p=c.prepareStatement("SELECT habit_id,checkin_date FROM habit_checkins WHERE user_id=?")) { p.setLong(1,userId); try(ResultSet r=p.executeQuery()){ while(r.next()) done.put(r.getLong(1)+"|"+r.getDate(2).toLocalDate(),true); } }
@@ -58,7 +58,7 @@ public final class JdbcWorkspaceDao {
     }
     public void saveTheme(long userId,String theme) {
         if(!Set.of("dark","light").contains(theme)) throw new IllegalArgumentException("Choose a valid theme");
-        try(Connection c=Database.getConnection();PreparedStatement p=c.prepareStatement("UPDATE user_preferences SET theme=?,updated_at=CURRENT_TIMESTAMP WHERE user_id=?")){p.setString(1,theme);p.setLong(2,userId);if(p.executeUpdate()!=1)throw new SQLException("Preferences not found");}
+        try(Connection c=Database.getConnection();PreparedStatement p=c.prepareStatement("UPDATE user_preferences SET theme=?,theme_selected=TRUE,updated_at=CURRENT_TIMESTAMP WHERE user_id=?")){p.setString(1,theme);p.setLong(2,userId);if(p.executeUpdate()!=1)throw new SQLException("Preferences not found");}
         catch(SQLException e){throw new IllegalStateException("Unable to save theme preference",e);}
     }
     public void saveHistoricalCheckin(long userId,long habitId,LocalDate date,boolean completed) {
