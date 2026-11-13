@@ -33,7 +33,7 @@ public final class JdbcUserDao implements UserDao {
             c.setAutoCommit(false);
             try {
                 try (PreparedStatement p=c.prepareStatement("UPDATE users SET display_name=? WHERE id=?")) { p.setString(1,displayName); p.setLong(2,userId); if(p.executeUpdate()!=1) throw new SQLException("Account not found"); }
-                try (PreparedStatement p=c.prepareStatement("UPDATE user_preferences SET theme=?, updated_at=CURRENT_TIMESTAMP WHERE user_id=?")) { p.setString(1,theme); p.setLong(2,userId); if(p.executeUpdate()!=1) throw new SQLException("Account preferences not found"); }
+                try (PreparedStatement p=c.prepareStatement("UPDATE user_preferences SET theme=?, theme_selected=TRUE, updated_at=CURRENT_TIMESTAMP WHERE user_id=?")) { p.setString(1,theme); p.setLong(2,userId); if(p.executeUpdate()!=1) throw new SQLException("Account preferences not found"); }
                 String email; try (PreparedStatement p=c.prepareStatement("SELECT email FROM users WHERE id=?")) { p.setLong(1,userId); try(ResultSet r=p.executeQuery()){if(!r.next())throw new SQLException("Account not found");email=r.getString(1);} }
                 c.commit(); return new UserAccount(userId,email,displayName);
             } catch(SQLException e) { c.rollback(); throw e; }
