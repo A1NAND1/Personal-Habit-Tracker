@@ -409,3 +409,227 @@ html.dark .sidebar-profile{position:relative;z-index:1;margin:0;padding:0;border
 html.dark .content{padding:32px clamp(22px,4vw,56px) 30px}html.dark .page-header h1{font-size:clamp(24px,2.5vw,36px);font-weight:800;line-height:1.2;letter-spacing:-.035em}html.dark .page-subtitle,html.dark .view-intro>p:last-child{font-size:13px}html.dark .date-pill{min-height:39px;padding:0 12px;border-radius:9px;font-size:10px}html.dark .header-actions .primary-btn{font-size:14px}
 .blueprint-grid,html.dark .blueprint-grid{gap:16px}.blueprint-card,html.dark #view-templates .blueprint-card{min-height:205px;padding:16px;border-radius:16px}.blueprint-icon,html.dark #view-templates .blueprint-icon{width:40px;height:40px;margin-bottom:12px;border-radius:12px;font-size:19px}.blueprint-category,html.dark #view-templates .blueprint-category{font-size:9px;letter-spacing:1px}.blueprint-card h3,html.dark #view-templates .blueprint-card h3{font-size:14px}.blueprint-card p,html.dark #view-templates .blueprint-card p{font-size:12px;line-height:1.55}.blueprint-add,html.dark #view-templates .blueprint-add{font-size:12px}
 html.dark .primary-btn,html.dark .hf-btn-crimson{color:#fff;background:linear-gradient(135deg,#EF2323 0%,#C41212 100%);border-radius:12px;box-shadow:0 6px 20px rgba(239,35,35,.3);font-weight:700;white-space:nowrap;flex-shrink:0}
+
+/* FINAL SIDEBAR FIX: 80%-Style Zero-Scroll Fit at 100% Browser Zoom */
+.sidebar,
+html.dark .sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  flex: 0 0 var(--sidebar-width);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 12px 16px 0 !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.sidebar::-webkit-scrollbar,
+.sidebar-main::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.sidebar-main {
+  flex: 0 1 auto !important;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 1. Compact Brand Header */
+.sidebar-brand,
+html.dark .sidebar-brand {
+  padding: 0 0 4px !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand,
+html.dark .brand {
+  font-size: 15.5px !important;
+  gap: 8px !important;
+}
+
+.brand-mark,
+html.dark .brand-mark {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  font-size: 12.5px !important;
+}
+
+.theme-toggle,
+html.dark .theme-toggle {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+}
+
+.theme-toggle svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* 2. Compact WORKSPACE Label & Navigation Links */
+.side-label,
+html.dark .side-label {
+  margin: 2px 0 2px !important;
+  font-size: 9.5px !important;
+  letter-spacing: 0.14em !important;
+}
+
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px !important;
+}
+
+.nav-link,
+html.dark .nav-link {
+  min-height: 34px !important;
+  padding: 6px 12px !important;
+  gap: 10px !important;
+  border-radius: 8px !important;
+  font-size: 12.5px !important;
+}
+
+.nav-icon,
+.nav-link svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* 3. Compact "+ Add a habit" Button */
+.side-add,
+html.dark .side-add {
+  min-height: 34px !important;
+  margin: 4px 0 2px !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  gap: 6px !important;
+}
+
+/* 4. Compact Daily Momentum Card */
+.momentum-card,
+html.dark .momentum-card {
+  margin: 2px 0 0 !important;
+  padding: 10px !important;
+  border-radius: 12px !important;
+}
+
+.momentum-top {
+  font-size: 11px !important;
+  margin-bottom: 5px !important;
+}
+
+.momentum-track {
+  height: 6px !important;
+  margin-bottom: 6px !important;
+}
+
+.momentum-card p {
+  font-size: 10.5px !important;
+  line-height: 1.35 !important;
+  margin: 0 !important;
+}
+
+/* 5. Bottom Footer: Clean Non-Overlapping Profile Row + Full Crimson Wave */
+.sidebar-footer,
+html.dark .sidebar-footer {
+  position: relative;
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  border-top: 1px solid var(--hf-border);
+  flex-shrink: 0;
+}
+
+.sidebar-footer .sidebar-profile,
+html.dark .sidebar-footer .sidebar-profile {
+  width: 100%;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 2px 0 !important;
+  margin: 0 !important;
+  border-top: 0 !important;
+}
+
+.sidebar-footer .profile-avatar,
+html.dark .sidebar-footer .profile-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px !important;
+  font-size: 12px !important;
+  border-radius: 9999px !important;
+}
+
+.sidebar-footer .profile-copy,
+html.dark .sidebar-footer .profile-copy {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.sidebar-footer .profile-copy strong,
+html.dark .sidebar-footer .profile-copy strong {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+.profile-chevron {
+  font-size: 11px;
+  color: var(--hf-subtext);
+  line-height: 1;
+}
+
+.sidebar-footer .profile-copy span,
+html.dark .sidebar-footer .profile-copy span {
+  font-size: 10.5px !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.sidebar-footer .profile-count,
+html.dark .sidebar-footer .profile-count {
+  flex: 0 0 auto !important;
+  margin-left: 4px !important;
+  font-size: 11px !important;
+  font-family: var(--font-mono);
+  white-space: nowrap !important;
+  color: var(--hf-subtext);
+}
+
+/* 6. Compact Bottom Crimson Wave Ribbon (Always visible at 100% zoom) */
+.sidebar-wave,
+html.dark .sidebar-wave {
+  position: relative !important;
+  inset: auto !important;
+  height: 44px !important;
+  flex: 0 0 44px !important;
+  margin: 4px -16px 0 !important;
+  overflow: hidden !important;
+  pointer-events: none;
+}

@@ -27,7 +27,14 @@
     </div>
     <div class="sidebar-footer">
         <span class="sidebar-footer-glow" aria-hidden="true"></span>
-        <button class="sidebar-profile" id="profile-menu-toggle" type="button" aria-expanded="false"><span class="profile-avatar"><c:out value="${account.displayName.substring(0,1).toUpperCase()}"/></span><span class="profile-copy"><strong>My routine</strong><span><c:out value="${accountSettings.workspaceName}"/></span></span><span class="profile-count"><span>${stats.totalHabits} active</span> ⌄</span></button>
+        <button class="sidebar-profile" id="profile-menu-toggle" type="button" aria-expanded="false">
+            <span class="profile-avatar"><c:out value="${account.displayName.substring(0,1).toUpperCase()}"/></span>
+            <span class="profile-copy">
+                <strong>My routine <span class="profile-chevron" aria-hidden="true">⌄</span></strong>
+                <span><c:out value="${accountSettings.workspaceName}"/></span>
+            </span>
+            <span class="profile-count">${stats.totalHabits} active</span>
+        </button>
         <div class="profile-dropdown" id="profile-dropdown" hidden><div class="account-popover-summary"><strong><c:out value="${accountSettings.fullName}"/></strong><span><c:out value="${account.email}"/></span><span><c:out value="${accountSettings.workspaceName}"/></span><span id="sync-status" class="sync-status" data-state="busy" role="status" aria-live="polite">Connecting to your account…</span></div><button type="button" id="open-account-settings">Account settings</button><form method="post" action="${pageContext.request.contextPath}/logout"><input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>"/><button type="submit">Log out</button></form></div>
         <div class="sidebar-wave" aria-hidden="true"><svg viewBox="0 0 280 68" fill="none" style="width: 100%; height: 100%;" preserveAspectRatio="none">
             <defs>
