@@ -172,7 +172,7 @@
     }
     .auth-lead {
       max-width: 520px;
-      margin: 0 0 22px;
+      margin: 16px 0 22px;
       color: var(--hf-subtext);
       font-size: 14px;
       line-height: 1.6;
@@ -521,23 +521,6 @@
         <div class="auth-showcase-body">
           <p class="auth-kicker">PERSONAL HABIT TRACKER · PRIVATE WORKSPACE</p>
           <h1>Build lasting routines across every device.</h1>
-
-          <div class="auth-formula">
-            <svg viewBox="0 0 24 18" fill="none" aria-hidden="true">
-              <defs>
-                <linearGradient id="hfAuthTrendArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#EF2323" stop-opacity="0.42" />
-                  <stop offset="100%" stop-color="#EF2323" stop-opacity="0.0" />
-                </linearGradient>
-              </defs>
-              <path d="M2 14.5 L8.5 9.5 L13 12.5 L21.5 3.5 L21.5 16.5 L2 16.5 Z" fill="url(#hfAuthTrendArea)" />
-              <path d="M2 14.5 L8.5 9.5 L13 12.5 L21.5 3.5" stroke="#EF2323" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M16.5 3.5 H21.5 V8.5" stroke="#EF2323" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span>1% BETTER EVERY DAY</span>
-            <span class="auth-formula-divider" aria-hidden="true"></span>
-            <span>1.01<sup>365</sup> = 37.78×</span>
-          </div>
 
           <p class="auth-lead">Sign in to access your private daily routine, 7-day check-in matrix, deep-work focus timer, and 30-day consistency analytics.</p>
 
