@@ -860,6 +860,21 @@
     });
     syncThemeColor();
     updateTimer();
+    function updateTimeGreeting() {
+        const greetingEl = document.getElementById('time-greeting');
+        if (!greetingEl) return;
+        const hour = new Date().getHours();
+        if (hour < 12) {
+            greetingEl.textContent = 'Good morning';
+        } else if (hour < 17) {
+            greetingEl.textContent = 'Good afternoon';
+        } else {
+            greetingEl.textContent = 'Good evening';
+        }
+    }
+
+    updateTimeGreeting();
+    window.setInterval(updateTimeGreeting, 60000);
     renderAll();
     loadRemote();
 })();
