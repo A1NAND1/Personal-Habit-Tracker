@@ -725,3 +725,147 @@ html.dark .sidebar {
     box-shadow: 0 6px 18px rgba(239, 35, 35, 0.25) !important;
   }
 }
+
+/* ==========================================================================
+   LOCK IDENTICAL MOBILE GEOMETRY IN LIGHT & DARK MODE (PHONE ONLY <= 767px)
+   ========================================================================== */
+@media (max-width: 767px) {
+  .content,
+  html.dark .content {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 16px calc(92px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .mobile-topbar,
+  html.dark .mobile-topbar {
+    display: flex !important;
+    margin: 0 -16px 20px !important;
+    padding: 13px 16px !important;
+    height: auto !important;
+  }
+
+  .page-header,
+  html.dark .page-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    margin-bottom: 21px !important;
+  }
+
+  .page-header h1,
+  html.dark .page-header h1 {
+    font-size: 23px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.035em !important;
+    max-width: 100% !important;
+  }
+
+  .header-actions,
+  html.dark .header-actions {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding-top: 0 !important;
+  }
+
+  .header-actions .primary-btn,
+  html.dark .header-actions .primary-btn {
+    min-height: 35px !important;
+    padding: 0 11px !important;
+    font-size: 11px !important;
+  }
+
+  .mobile-nav,
+  html.dark .mobile-nav {
+    position: fixed !important;
+    inset: auto 0 0 !important;
+    z-index: 30 !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    gap: 0 !important;
+    padding: 7px 8px calc(7px + env(safe-area-inset-bottom)) !important;
+    background: var(--hf-surface) !important;
+    border-top: 1px solid var(--hf-border) !important;
+  }
+
+  .mobile-nav button,
+  html.dark .mobile-nav button {
+    min-width: 0 !important;
+    display: grid !important;
+    justify-items: center !important;
+    align-content: center !important;
+    gap: 2px !important;
+    padding: 3px 0 !important;
+    color: var(--hf-subtext) !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-nav button.active,
+  html.dark .mobile-nav button.active {
+    color: #EF2323 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-nav button svg,
+  html.dark .mobile-nav button svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .mobile-nav button small,
+  html.dark .mobile-nav button small {
+    font-size: 8px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .content,
+  html.dark .content {
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+  }
+
+  .mobile-topbar,
+  html.dark .mobile-topbar {
+    margin-right: -15px !important;
+    margin-left: -15px !important;
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+  }
+
+  .page-header h1,
+  html.dark .page-header h1 {
+    font-size: 20px !important;
+  }
+
+  .eyebrow,
+  html.dark .eyebrow {
+    font-size: 8px !important;
+  }
+
+  .header-actions .primary-btn,
+  html.dark .header-actions .primary-btn {
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+    padding: 0 11px !important;
+    font-size: 11px !important;
+  }
+
+  .header-actions .primary-btn .primary-label,
+  html.dark .header-actions .primary-btn .primary-label {
+    font-size: 11px !important;
+  }
+}
