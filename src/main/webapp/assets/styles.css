@@ -960,3 +960,24 @@ html.dark .sidebar-footer {
     width: auto !important;
   }
 }
+
+/* ==========================================================================
+   KEEP "Plan a focus session ->" ON A SINGLE LINE ON MOBILE PORTRAIT
+   ========================================================================== */
+.insight-card .text-action,
+html.dark .insight-card .text-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  width: auto !important;
+  max-width: none !important;
+  white-space: nowrap !important;
+  text-align: left !important;
+}
+
+.insight-card .text-action span,
+html.dark .insight-card .text-action span {
+  display: inline-block !important;
+  line-height: 1 !important;
+}
