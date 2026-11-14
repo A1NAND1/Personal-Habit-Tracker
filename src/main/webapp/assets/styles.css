@@ -633,3 +633,34 @@ html.dark .sidebar-wave {
   overflow: hidden !important;
   pointer-events: none;
 }
+
+/* ========================================================================== */
+/* FIX DESKTOP STICKY SIDEBAR ON PAGE SCROLL & HIDE MOBILE NAV ON DESKTOP */
+/* ========================================================================== */
+html,
+body {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+.app-shell {
+  overflow: visible !important;
+  overflow-x: clip !important;
+  align-items: flex-start !important;
+}
+
+.sidebar,
+html.dark .sidebar {
+  position: sticky !important;
+  top: 0 !important;
+  align-self: flex-start !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+
+@media (min-width: 768px) {
+  .mobile-topbar,
+  .mobile-nav {
+    display: none !important;
+  }
+}
