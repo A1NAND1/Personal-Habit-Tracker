@@ -869,3 +869,94 @@ html.dark .sidebar {
     font-size: 11px !important;
   }
 }
+
+/* ==========================================================================
+   FIX PHONE LANDSCAPE SIDEBAR OVERLAP & DASHBOARD LAYOUT (768px - 1120px)
+   ========================================================================== */
+
+/* 1. Never allow .sidebar-main to shrink smaller than its content on short/landscape viewports */
+.sidebar,
+html.dark .sidebar {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+
+.sidebar-main,
+html.dark .sidebar-main {
+  flex: 0 0 auto !important;
+  min-height: max-content !important;
+  overflow: visible !important;
+}
+
+.momentum-card,
+html.dark .momentum-card {
+  margin: 2px 0 8px !important;
+}
+
+.sidebar-footer,
+html.dark .sidebar-footer {
+  flex: 0 0 auto !important;
+  margin-top: auto !important;
+  padding-top: 8px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* 2. Phone Landscape & Tablet (768px to 1120px): 2x2 stat grid, clean toolbar, and locked Light/Dark geometry */
+@media (min-width: 768px) and (max-width: 1120px) {
+  :root,
+  html.dark {
+    --sidebar-width: 225px !important;
+  }
+
+  .content,
+  html.dark .content {
+    padding: 28px 26px 30px !important;
+  }
+
+  .page-header,
+  html.dark .page-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .header-actions,
+  html.dark .header-actions {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding-top: 0 !important;
+  }
+
+  .stats-grid,
+  html.dark .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .stat-card,
+  html.dark .stat-card {
+    min-height: 124px !important;
+    padding: 15px !important;
+  }
+
+  .habits-toolbar-top,
+  html.dark .habits-toolbar-top {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .habits-filter-controls,
+  html.dark .habits-filter-controls {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .habits-filter-controls .search-box,
+  html.dark .habits-filter-controls .search-box {
+    flex: 1 1 200px !important;
+    width: auto !important;
+  }
+}
