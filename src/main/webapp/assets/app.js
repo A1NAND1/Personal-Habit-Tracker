@@ -37,7 +37,7 @@
             const response = await fetch(base + 'api/workspace', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }, body: JSON.stringify(payload) });
             const result = await response.json().catch(function () { return {}; });
             if (!response.ok) { setSync('Not saved', 'error'); announce(result.error || 'Your change could not be saved.'); return false; }
-            setSync('All changes saved', 'ok');
+            setSync('Synced · Just now', 'ok');
             return true;
         } catch (error) { setSync('Sync unavailable', 'error'); announce('Could not reach HabitFlow. Your change was not saved.'); return false; }
     }
@@ -56,7 +56,7 @@
                 document.querySelectorAll('[data-theme-toggle]').forEach(function (button) { button.setAttribute('aria-label', data.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'); });
                 syncThemeColor();
             }
-            setSync('All changes synced', 'ok'); renderAll();
+            setSync('Synced · Just now', 'ok'); renderAll();
         } catch (error) { setSync('Sync unavailable', 'error'); announce('Your account data could not be loaded. Please refresh when your connection is available.'); }
     }
 
@@ -472,7 +472,9 @@
             panel.classList.toggle('active', panel.id === 'view-' + view);
         });
         document.querySelectorAll('[data-view]').forEach(function (button) {
-            button.classList.toggle('active', button.dataset.view === view);
+            const active = button.dataset.view === view;
+            button.classList.toggle('active', active);
+            if (button.classList.contains('nav-link')) button.classList.toggle('hf-nav-active', active);
         });
         if (view === 'matrix') renderMatrix();
         if (view === 'analytics') renderAnalytics();
