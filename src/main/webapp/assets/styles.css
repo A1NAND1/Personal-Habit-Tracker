@@ -634,9 +634,7 @@ html.dark .sidebar-wave {
   pointer-events: none;
 }
 
-/* ========================================================================== */
-/* FIX DESKTOP STICKY SIDEBAR ON PAGE SCROLL & HIDE MOBILE NAV ON DESKTOP */
-/* ========================================================================== */
+/* Preserve the desktop sticky sidebar while the page scrolls. */
 html,
 body {
   overflow-x: clip !important;
@@ -658,9 +656,72 @@ html.dark .sidebar {
   max-height: 100vh !important;
 }
 
+/* ========================================================================== */
+/* RESTORE DESKTOP BOTTOM QUICK-SWITCHER PILL BAR (Today, Matrix, Analytics, Timer, Blueprints) */
+/* ========================================================================== */
 @media (min-width: 768px) {
-  .mobile-topbar,
-  .mobile-nav {
+  .mobile-topbar {
     display: none !important;
+  }
+
+  .mobile-nav {
+    position: static !important;
+    inset: auto !important;
+    z-index: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 24px !important;
+    padding: 16px 0 0 !important;
+    background: transparent !important;
+    border-top: 1px solid var(--hf-border) !important;
+    backdrop-filter: none !important;
+  }
+
+  .mobile-nav button {
+    min-width: 0 !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 8px 14px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    color: var(--hf-subtext) !important;
+    background: var(--hf-surface) !important;
+    border: 1px solid var(--hf-border) !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+  }
+
+  .mobile-nav button:hover:not(.active) {
+    color: var(--hf-text) !important;
+    border-color: rgba(239, 35, 35, 0.35) !important;
+  }
+
+  .mobile-nav button svg {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .mobile-nav button small {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+  }
+
+  .mobile-nav button.active,
+  html.dark .mobile-nav button.active {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #EF2323 0%, #B91313 100%) !important;
+    border: 1px solid rgba(255, 77, 77, 0.45) !important;
+    box-shadow: 0 6px 18px rgba(239, 35, 35, 0.25) !important;
   }
 }
