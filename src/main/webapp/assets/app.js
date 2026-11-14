@@ -27,9 +27,9 @@
     let timerHandle = null;
     function setSync(message, state) {
         const node = document.getElementById('sync-status');
-        if (!node) return;
-        node.textContent = message;
-        node.dataset.state = state || 'ok';
+        if (node) { node.textContent = message; node.dataset.state = state || 'ok'; }
+        const settingsStatus = document.getElementById('settings-sync-status');
+        if (settingsStatus) settingsStatus.textContent = message;
     }
     async function saveRemote(payload) {
         setSync('Saving…', 'busy');
@@ -53,6 +53,10 @@
             focusData.byHabit = focusData.byHabit || {}; focusData.byDay = focusData.byDay || {};
             if (data.theme === 'light' || data.theme === 'dark') {
                 document.documentElement.classList.toggle('dark', data.theme === 'dark');
+                const themeSelect = document.getElementById('settings-theme-select');
+                if (themeSelect) themeSelect.value = data.theme;
+                const themeAction = document.getElementById('settings-theme-toggle');
+                if (themeAction) themeAction.textContent = 'Switch to ' + (data.theme === 'dark' ? 'Light' : 'Dark') + ' Mode';
                 document.querySelectorAll('[data-theme-toggle]').forEach(function (button) { button.setAttribute('aria-label', data.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'); });
                 syncThemeColor();
             }
@@ -151,6 +155,12 @@
             if (timeSelect) timeSelect.value = time;
             const note = card.querySelector('.daily-note');
             if (note) note.value = (item.notes || {})[todayKey] || '';
+            const preview = card.querySelector('.note-preview');
+            const savedNote = (item.notes || {})[todayKey] || '';
+            if (preview) {
+                preview.textContent = savedNote ? 'Note: “' + savedNote + '”' : '';
+                preview.hidden = !savedNote;
+            }
             updateTarget(card);
             updateFocusBadge(card);
         });
@@ -553,8 +563,13 @@
     });
     document.querySelectorAll('#open-account-settings,#header-account-settings').forEach(function (button) { button.addEventListener('click', openAccountSettings); });
     document.getElementById('close-account-settings').addEventListener('click', function () { accountModal.classList.remove('open'); accountModal.setAttribute('aria-hidden', 'true'); });
+    document.getElementById('cancel-account-settings').addEventListener('click', function () { accountModal.classList.remove('open'); accountModal.setAttribute('aria-hidden', 'true'); });
     accountModal.addEventListener('click', function (event) { if (event.target === accountModal) { accountModal.classList.remove('open'); accountModal.setAttribute('aria-hidden', 'true'); } });
-
+    document.getElementById('sync-now').addEventListener('click', loadRemote);
+    document.getElementById('settings-theme-toggle').addEventListener('click', function () {
+        const toggle = document.querySelector('.sidebar .theme-toggle[data-theme-toggle]');
+        if (toggle) toggle.click();
+    });
     document.querySelectorAll('[data-view]').forEach(function (button) {
         button.addEventListener('click', function () { switchView(button.dataset.view); });
     });
@@ -576,12 +591,18 @@
     document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
         button.addEventListener('click', async function () {
             const dark = document.documentElement.classList.toggle('dark');
+            const themeSelect = document.getElementById('settings-theme-select');
+            if (themeSelect) themeSelect.value = dark ? 'dark' : 'light';
+            const themeAction = document.getElementById('settings-theme-toggle');
+            if (themeAction) themeAction.textContent = 'Switch to ' + (dark ? 'Light' : 'Dark') + ' Mode';
             document.querySelectorAll('[data-theme-toggle]').forEach(function (toggle) {
                 toggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
             });
             syncThemeColor();
             if (!(await saveRemote({ action: 'theme', theme: dark ? 'dark' : 'light' }))) {
                 document.documentElement.classList.toggle('dark', !dark);
+                if (themeSelect) themeSelect.value = dark ? 'light' : 'dark';
+                if (themeAction) themeAction.textContent = 'Switch to ' + (dark ? 'Dark' : 'Light') + ' Mode';
                 document.querySelectorAll('[data-theme-toggle]').forEach(function (toggle) { toggle.setAttribute('aria-label', dark ? 'Switch to dark mode' : 'Switch to light mode'); });
                 syncThemeColor();
             }
@@ -628,7 +649,6 @@
             const drawer = card.querySelector('.note-drawer');
             const shouldOpen = drawer.hidden;
             document.querySelectorAll('.note-drawer').forEach(function (other) { other.hidden = true; });
-            drawer.querySelector('.note-habit-name').textContent = card.querySelector('.habit-title').textContent;
             drawer.hidden = !shouldOpen;
             if (!drawer.hidden) {
                 renderNoteHistory(card);
@@ -660,6 +680,8 @@
             if (!(await saveRemote({ action: 'metadata', habitId: Number(card.dataset.habitId), date: todayKey, time: time, count: target.count, total: target.total }))) return;
             item.notes = item.notes || {}; item.notes[todayKey] = noteText; item.time = time; item.target = target;
             card.querySelector('.time-label').textContent = item.time;
+            const preview = card.querySelector('.note-preview');
+            if (preview) { preview.textContent = noteText ? 'Note: “' + noteText + '”' : ''; preview.hidden = !noteText; }
             renderNoteHistory(card);
             applyFilters();
             announce('Note saved to your account.');

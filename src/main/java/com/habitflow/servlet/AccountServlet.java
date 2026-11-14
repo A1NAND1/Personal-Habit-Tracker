@@ -27,7 +27,7 @@ public final class AccountServlet extends HttpServlet {
         } catch(NumberFormatException|DateTimeParseException ex) {
             res.sendRedirect(req.getContextPath()+"/?error=Enter+valid+account+settings");return;
         }
-        if(!valid(name) || !valid(fullName) || !valid(workspaceName) || weeklyGoalDays<3 || weeklyGoalDays>7
+        if(!valid(name) || !valid(fullName) || !valid(workspaceName) || weeklyGoalDays<1 || weeklyGoalDays>7
                 || theme==null || !(theme.equals("dark")||theme.equals("light"))) {
             res.sendRedirect(req.getContextPath()+"/?error=Please+enter+valid+account+settings");return;
         }
