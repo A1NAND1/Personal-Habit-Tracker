@@ -501,6 +501,13 @@
         height: 48px;
       }
     }
+    .auth-or-divider { display:flex; align-items:center; gap:12px; margin:14px 0; }
+    .auth-or-divider::before,.auth-or-divider::after { content:""; flex:1; height:1px; background:var(--hf-border); }
+    .auth-or-divider span { color:var(--hf-subtext); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+    .auth-google-btn { position:relative; width:100%; min-height:46px; border-radius:9999px; border:1px solid var(--hf-border); background:var(--hf-surface); color:var(--hf-text); font-family:inherit; font-size:15px; font-weight:600; line-height:1.2; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:0 20px; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,.04); transition:background .16s ease,border-color .16s ease,transform .15s ease,box-shadow .16s ease; }
+    .auth-google-btn:hover { border-color:var(--hf-subtext); box-shadow:0 4px 12px rgba(15,23,42,.08); }
+    .auth-google-btn:active { transform:scale(.995); }
+    .auth-google-btn .google-g-icon { position:absolute; left:18px; width:20px; height:20px; flex-shrink:0; }
   </style>
 </head>
 <body>
@@ -663,6 +670,17 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </button>
         </form>
+
+        <div class="auth-or-divider" role="separator" aria-label="or"><span>or</span></div>
+        <a href="${pageContext.request.contextPath}/auth/google?mode=${mode eq 'register' ? 'register' : 'login'}" class="auth-google-btn">
+          <svg class="google-g-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.26-.96 2.33-2.04 3.05l3.3 2.56c1.92-1.77 3.04-4.38 3.04-7.46 0-.72-.06-1.41-.19-2.05H12z"/>
+            <path fill="#34A853" d="M12 22c2.75 0 5.06-.91 6.75-2.47l-3.3-2.56c-.91.61-2.08.98-3.45.98-2.65 0-4.9-1.79-5.71-4.19H2.88v2.64C4.56 19.74 8.01 22 12 22z"/>
+            <path fill="#FBBC05" d="M6.29 13.76A5.98 5.98 0 0 1 5.97 12c0-.61.11-1.21.32-1.76V7.6H2.88A9.98 9.98 0 0 0 2 12c0 1.61.39 3.14 1.08 4.4l3.21-2.64z"/>
+            <path fill="#4285F4" d="M12 5.95c1.5 0 2.84.52 3.9 1.53l2.92-2.92C17.05 2.91 14.74 2 12 2 8.01 2 4.56 4.26 2.88 7.6l3.41 2.64C7.1 7.74 9.35 5.95 12 5.95z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </a>
 
         <p class="auth-account-switch">
           <c:choose>

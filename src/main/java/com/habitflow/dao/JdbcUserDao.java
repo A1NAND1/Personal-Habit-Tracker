@@ -24,6 +24,21 @@ public final class JdbcUserDao implements UserDao {
             throw new IllegalStateException("Unable to create account",e);
         }
     }
+    @Override public UserAccount createGoogleAccount(String email, String passwordHash, String displayName, String googleSubject) {
+        String sql = "INSERT INTO users(email,password_hash,display_name,full_name,google_sub) VALUES (?,?,?,?,?)";
+        try (Connection c=Database.getConnection(); PreparedStatement p=c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            c.setAutoCommit(false);
+            p.setString(1,email); p.setString(2,passwordHash); p.setString(3,displayName); p.setString(4,displayName); p.setString(5,googleSubject); p.executeUpdate();
+            long id;
+            try (ResultSet r=p.getGeneratedKeys()) { if (!r.next()) throw new SQLException("No generated user id"); id=r.getLong(1); }
+            saveDefaults(c,id);
+            saveStarterHabits(c,id);
+            c.commit(); return new UserAccount(id,email,displayName);
+        } catch (SQLException e) {
+            if ("23505".equals(e.getSQLState())) throw new IllegalArgumentException("This Google account or email is already linked to a HabitFlow account");
+            throw new IllegalStateException("Unable to create Google account",e);
+        }
+    }
     private void saveDefaults(Connection c,long userId) throws SQLException {
         try (PreparedStatement p=c.prepareStatement("INSERT INTO user_preferences(user_id) VALUES (?)")) { p.setLong(1,userId); p.executeUpdate(); }
     }
@@ -48,6 +63,23 @@ public final class JdbcUserDao implements UserDao {
         try (Connection c=Database.getConnection(); PreparedStatement p=c.prepareStatement(sql)) {
             p.setString(1,email); try (ResultSet r=p.executeQuery()) { return r.next()?Optional.of(new UserWithPassword(new UserAccount(r.getLong("id"),r.getString("email"),r.getString("display_name")),r.getString("password_hash"))):Optional.empty(); }
         } catch (SQLException e) { throw new IllegalStateException("Unable to read account",e); }
+    }
+    @Override public Optional<UserAccount> findByGoogleSubject(String googleSubject) {
+        String sql="SELECT id,email,display_name FROM users WHERE google_sub=?";
+        try (Connection c=Database.getConnection(); PreparedStatement p=c.prepareStatement(sql)) {
+            p.setString(1,googleSubject);
+            try (ResultSet r=p.executeQuery()) { return r.next()?Optional.of(new UserAccount(r.getLong("id"),r.getString("email"),r.getString("display_name"))):Optional.empty(); }
+        } catch (SQLException e) { throw new IllegalStateException("Unable to read Google account link",e); }
+    }
+    @Override public boolean linkGoogleSubject(long userId,String email,String googleSubject) {
+        String sql="UPDATE users SET google_sub=? WHERE id=? AND lower(email)=? AND google_sub IS NULL";
+        try (Connection c=Database.getConnection(); PreparedStatement p=c.prepareStatement(sql)) {
+            p.setString(1,googleSubject); p.setLong(2,userId); p.setString(3,email);
+            return p.executeUpdate()==1;
+        } catch (SQLException e) {
+            if ("23505".equals(e.getSQLState())) throw new IllegalArgumentException("This Google account is already linked to another HabitFlow account");
+            throw new IllegalStateException("Unable to link Google account",e);
+        }
     }
     @Override public UserAccount updateProfile(long userId,String displayName,String theme) {
         AccountSettings settings=findSettings(userId);
