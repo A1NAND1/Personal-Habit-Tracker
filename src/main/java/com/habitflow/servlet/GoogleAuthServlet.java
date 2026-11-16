@@ -37,6 +37,8 @@ public final class GoogleAuthServlet extends HttpServlet {
     private static final String NONCE = "google_oauth_nonce";
     private static final String MODE = "google_oauth_mode";
     private static final String LINK_USER = "google_oauth_link_user_id";
+    public static final String RESET_VERIFIED_USER = "password_reset_verified_user_id";
+    public static final String RESET_VERIFIED_AT = "password_reset_verified_at";
     private static final int REMEMBER_ME_SECONDS = 30 * 24 * 60 * 60;
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final HttpClient HTTP = HttpClient.newBuilder()
@@ -46,9 +48,14 @@ public final class GoogleAuthServlet extends HttpServlet {
         String path = path(req);
         if ("/auth/google/callback".equals(path)) { callback(req, resp); return; }
         if (!"/auth/google".equals(path)) { resp.sendError(HttpServletResponse.SC_NOT_FOUND); return; }
-        String mode = "register".equalsIgnoreCase(req.getParameter("mode")) ? "register" : "login";
-        if (!configured()) { showAuthError(req, resp, mode, "Google Sign-In is not configured yet. Please use Email and Password."); return; }
-        begin(req, resp, mode, null);
+        String rawMode=req.getParameter("mode");
+        String uiMode="register".equalsIgnoreCase(rawMode)?"register":("reset".equalsIgnoreCase(rawMode)?"forgot":"login");
+        String oauthMode="register".equalsIgnoreCase(rawMode)?"register":("reset".equalsIgnoreCase(rawMode)?"reset":"login");
+        if (!configured()) { showAuthError(req, resp, uiMode, "Google Sign-In is not configured yet. Please use the email reset link."); return; }
+        try { begin(req, resp, oauthMode, null); }
+        catch(IllegalArgumentException | IllegalStateException invalidConfiguration) {
+            showAuthError(req,resp,uiMode,"Google Sign-In is not configured correctly. Please use the email reset link.");
+        }
     }
 
     @Override protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -71,6 +78,10 @@ public final class GoogleAuthServlet extends HttpServlet {
         session.setAttribute(STATE, state);
         session.setAttribute(NONCE, nonce);
         session.setAttribute(MODE, mode);
+        if ("reset".equals(mode)) {
+            session.removeAttribute(RESET_VERIFIED_USER);
+            session.removeAttribute(RESET_VERIFIED_AT);
+        }
         if (linkUserId == null) session.removeAttribute(LINK_USER);
         else session.setAttribute(LINK_USER, linkUserId);
 
@@ -96,7 +107,7 @@ public final class GoogleAuthServlet extends HttpServlet {
             session.removeAttribute(STATE); session.removeAttribute(NONCE);
             session.removeAttribute(MODE); session.removeAttribute(LINK_USER);
         }
-        String mode = "register".equals(storedMode) ? "register" : "login";
+        String mode = "register".equals(storedMode) ? "register" : ("reset".equals(storedMode)?"forgot":"login");
         if (!constantTimeEquals(storedState, req.getParameter("state"))) {
             showAuthError(req, resp, mode, "Google sign-in could not be verified. Please try again."); return;
         }
@@ -109,6 +120,18 @@ public final class GoogleAuthServlet extends HttpServlet {
         }
         try {
             GoogleIdentity identity = exchangeAndVerify(req.getParameter("code"), redirectUri(req), (String) storedNonce);
+            if("reset".equals(storedMode)) {
+                UserAccount account=authService(req).verifyGoogleForPasswordReset(identity.subject(),identity.email(),identity.name());
+                HttpSession activeSession=req.getSession(true);
+                req.changeSessionId();
+                activeSession.removeAttribute(STATE); activeSession.removeAttribute(NONCE); activeSession.removeAttribute(MODE); activeSession.removeAttribute(LINK_USER);
+                activeSession.removeAttribute(SecurityFilter.ACCOUNT);
+                activeSession.setAttribute(RESET_VERIFIED_USER,account.id());
+                activeSession.setAttribute(RESET_VERIFIED_AT,System.currentTimeMillis());
+                activeSession.setAttribute(SecurityFilter.CSRF,SecurityFilter.newToken());
+                resp.sendRedirect(req.getContextPath()+"/reset-password");
+                return;
+            }
             if ("link".equals(storedMode)) {
                 UserAccount current = (UserAccount) session.getAttribute(SecurityFilter.ACCOUNT);
                 if (current == null || !(linkUserId instanceof Long) || current.id() != (Long) linkUserId) {
@@ -173,21 +196,35 @@ public final class GoogleAuthServlet extends HttpServlet {
 
     private String redirectUri(HttpServletRequest req) {
         String explicit = setting("GOOGLE_REDIRECT_URI");
-        if (explicit != null && !explicit.isBlank()) return explicit.trim();
-        if ("production".equalsIgnoreCase(System.getenv("APP_ENV"))) throw new IllegalStateException("GOOGLE_REDIRECT_URI must be configured in production");
-        String scheme = req.isSecure() ? "https" : "http";
-        String forwardedProto = req.getHeader("X-Forwarded-Proto");
-        if (forwardedProto != null && (forwardedProto.equalsIgnoreCase("http") || forwardedProto.equalsIgnoreCase("https"))) scheme = forwardedProto.toLowerCase();
+        if (explicit != null) {
+            URI uri=parseTrustedUri(explicit,"production".equalsIgnoreCase(setting("APP_ENV")));
+            String expectedPath=req.getContextPath()+"/auth/google/callback";
+            if(!expectedPath.equals(uri.getRawPath())) throw new IllegalStateException("GOOGLE_REDIRECT_URI must use the Google callback path");
+            return uri.toASCIIString();
+        }
+        if ("production".equalsIgnoreCase(setting("APP_ENV"))) throw new IllegalStateException("GOOGLE_REDIRECT_URI must be configured in production");
         String host = req.getServerName();
-        if (host == null || !host.matches("[A-Za-z0-9.-]+")) throw new IllegalStateException("Invalid OAuth callback host");
+        if (host == null || !(host.equalsIgnoreCase("localhost") || host.equals("127.0.0.1"))) throw new IllegalStateException("Local OAuth callback must use a loopback host");
+        String scheme=req.isSecure()?"https":"http";
         int port = req.getServerPort();
         String authority = (port == 80 && "http".equals(scheme)) || (port == 443 && "https".equals(scheme)) ? host : host + ":" + port;
         return scheme + "://" + authority + req.getContextPath() + "/auth/google/callback";
     }
 
+    private URI parseTrustedUri(String value,boolean requireHttps) {
+        URI uri;
+        try { uri=URI.create(value.trim()); } catch(IllegalArgumentException invalid) { throw new IllegalStateException("OAuth URI is invalid"); }
+        String scheme=uri.getScheme()==null?"":uri.getScheme().toLowerCase();
+        if(uri.isOpaque() || !(scheme.equals("https") || scheme.equals("http")) || (requireHttps && !scheme.equals("https"))
+                || uri.getHost()==null || uri.getRawAuthority()==null || uri.getRawUserInfo()!=null
+                || uri.getRawAuthority().contains("@") || !uri.getRawAuthority().matches("(?i)(\\[[0-9a-f:.]+\\]|[a-z0-9.-]+)(:[0-9]{1,5})?") || uri.getRawQuery()!=null || uri.getRawFragment()!=null
+                || uri.getPort()>65535 || uri.getPort()<-1) throw new IllegalStateException("OAuth URI must have a valid host and authority without credentials, query, or fragment");
+        return uri;
+    }
+
     private boolean configured() {
         return setting("GOOGLE_CLIENT_ID") != null && setting("GOOGLE_CLIENT_SECRET") != null
-                && (!"production".equalsIgnoreCase(System.getenv("APP_ENV")) || setting("GOOGLE_REDIRECT_URI") != null);
+                && (!"production".equalsIgnoreCase(setting("APP_ENV")) || setting("GOOGLE_REDIRECT_URI") != null);
     }
     private String setting(String name) {
         String value = System.getenv(name);
@@ -209,7 +246,8 @@ public final class GoogleAuthServlet extends HttpServlet {
     }
     private String safeAuthMessage(Exception error) {
         String message = error.getMessage();
-        if (message != null && message.startsWith("This email already has")) return message;
+        if (message != null && (message.startsWith("This email already has") || message.startsWith("No HabitFlow account was found")
+                || message.startsWith("This HabitFlow account is already linked") || message.startsWith("This Google account is linked"))) return message;
         return "Google sign-in could not be completed. Please try again or use Email and Password.";
     }
     private void showAuthError(HttpServletRequest req, HttpServletResponse resp, String mode, String error) throws ServletException, IOException {
