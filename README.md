@@ -17,6 +17,7 @@ This is a Java subject project built with Servlets, JSP, JDBC, and Maven.
 - See current and best streaks, weekly check-ins, and completion rate.
 - Delete habits and their check-in history.
 - Register, sign in, and sign out with BCrypt password hashes and CSRF-protected forms.
+- Recover an email-password account with a one-time 15-minute email reset link or verified Google identity; recovery does not permanently link Google to the account.
 - Keep habits, check-ins, notes, goals, focus sessions, profile name, and theme scoped to the signed-in account.
 - Save workspace changes through the Java API to the configured database.
 - Use a local H2 database or a hosted PostgreSQL database.
@@ -66,8 +67,16 @@ Production mode requires PostgreSQL. Set these environment variables on the host
 | `JDBC_URL` | `jdbc:postgresql://HOST/DATABASE?sslmode=require&prepareThreshold=0` |
 | `JDBC_USER` | PostgreSQL role name |
 | `JDBC_PASSWORD` | PostgreSQL role password |
+| `APP_BASE_URL` | The app's public HTTPS origin, for example `https://your-service.onrender.com` |
+| `GOOGLE_CLIENT_ID` | Google OAuth web client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth web client secret |
+| `GOOGLE_REDIRECT_URI` | Exact HTTPS callback URL ending in `/auth/google/callback` |
+| `RESEND_API_KEY` | Resend API key, stored only in Render secret settings |
+| `RESEND_FROM_EMAIL` | Verified sender address configured in Resend |
 
 The database password belongs in the hosting provider's secret settings, not in this repository. `prepareThreshold=0` is set when using a hosted connection pooler.
+
+Password reset email delivery requires `RESEND_API_KEY` and `RESEND_FROM_EMAIL`; the reset link origin comes from `APP_BASE_URL` or the validated HTTPS origin of `GOOGLE_REDIRECT_URI`. Never commit these credentials. Google recovery still requires a verified Google identity and exact email match, and does not permanently link it to an existing password account.
 
 The recorded PostgreSQL integration tests used a separate local test database, not Neon or Render. To run them locally, set `HABITFLOW_TEST_JDBC_URL`, `HABITFLOW_TEST_JDBC_USER`, and `HABITFLOW_TEST_JDBC_PASSWORD` in the current PowerShell session for an isolated database, then run:
 
@@ -92,7 +101,9 @@ Merging a release to the service's watched `main` branch can trigger a deploy if
 
 ## Account and data notes
 
-New accounts only see habits and records created for their own account. Existing rows from the earlier shared workspace have no reliable owner, so migrations keep them intact but unassigned and hidden. No production demo users are seeded. The profile screen states that device history, email verification, and password reset are not available.
+New accounts only see habits and records created for their own account. Existing rows from the earlier shared workspace have no reliable owner, so migrations keep them intact but unassigned and hidden. No production demo users are seeded. The profile screen does not claim that device history or email verification is available. Password recovery uses Resend email delivery or a verified Google identity, and permanent Google account linking remains in Account Settings after password confirmation.
+
+Password recovery request limits use a bounded, thread-safe in-memory sliding window. Limits are local to each application instance and are not shared between Render instances; deployments scaled across multiple instances should use a shared rate-limit store for consistent cross-instance enforcement.
 
 The recorded local verification is Java 17, 9 unit tests, 3 PostgreSQL integration tests against an isolated PostgreSQL 18.6 database, and local Tomcat testing. Production Neon, the current live URL, and physical-device synchronization have not been verified for this release. The live demo link above may still serve the older application until a separately approved release is deployed.
 

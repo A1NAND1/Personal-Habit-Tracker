@@ -6,6 +6,7 @@ import com.habitflow.model.UserAccount;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Instant;
 import java.util.Optional;
 
 public final class JdbcUserDao implements UserDao {
@@ -70,6 +71,70 @@ public final class JdbcUserDao implements UserDao {
             p.setString(1,googleSubject);
             try (ResultSet r=p.executeQuery()) { return r.next()?Optional.of(new UserAccount(r.getLong("id"),r.getString("email"),r.getString("display_name"))):Optional.empty(); }
         } catch (SQLException e) { throw new IllegalStateException("Unable to read Google account link",e); }
+    }
+    @Override public Optional<UserAccount> findById(long userId) {
+        String sql="SELECT id,email,display_name FROM users WHERE id=?";
+        try(Connection c=Database.getConnection();PreparedStatement p=c.prepareStatement(sql)) {
+            p.setLong(1,userId);
+            try(ResultSet r=p.executeQuery()) { return r.next()?Optional.of(new UserAccount(r.getLong("id"),r.getString("email"),r.getString("display_name"))):Optional.empty(); }
+        } catch(SQLException e) { throw new IllegalStateException("Unable to read account",e); }
+    }
+    @Override public void savePasswordResetToken(long userId,String tokenHash,Instant expiresAt) {
+        try(Connection c=Database.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                try(PreparedStatement p=c.prepareStatement("DELETE FROM password_reset_tokens WHERE user_id=?")) { p.setLong(1,userId); p.executeUpdate(); }
+                try(PreparedStatement p=c.prepareStatement("INSERT INTO password_reset_tokens(token_hash,user_id,expires_at) VALUES (?,?,?)")) {
+                    p.setString(1,tokenHash); p.setLong(2,userId); p.setTimestamp(3,Timestamp.from(expiresAt)); p.executeUpdate();
+                }
+                c.commit();
+            } catch(SQLException e) { c.rollback(); throw e; }
+        } catch(SQLException e) { throw new IllegalStateException("Unable to save password reset request",e); }
+    }
+    @Override public void deletePasswordResetToken(String tokenHash) {
+        try(Connection c=Database.getConnection();PreparedStatement p=c.prepareStatement("DELETE FROM password_reset_tokens WHERE token_hash=?")) {
+            p.setString(1,tokenHash); p.executeUpdate();
+        } catch(SQLException e) { throw new IllegalStateException("Unable to revoke password reset request",e); }
+    }
+    @Override public Optional<UserAccount> findValidResetTokenUser(String tokenHash,Instant now) {
+        String sql="SELECT u.id,u.email,u.display_name FROM password_reset_tokens t JOIN users u ON u.id=t.user_id WHERE t.token_hash=? AND t.used_at IS NULL AND t.expires_at>?";
+        try(Connection c=Database.getConnection();PreparedStatement p=c.prepareStatement(sql)) {
+            p.setString(1,tokenHash); p.setTimestamp(2,Timestamp.from(now));
+            try(ResultSet r=p.executeQuery()) { return r.next()?Optional.of(new UserAccount(r.getLong("id"),r.getString("email"),r.getString("display_name"))):Optional.empty(); }
+        } catch(SQLException e) { throw new IllegalStateException("Unable to verify password reset request",e); }
+    }
+    @Override public Optional<UserAccount> consumeResetTokenAndUpdatePassword(String tokenHash,String newPasswordHash,Instant now) {
+        try(Connection c=Database.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                // Claim atomically before reading token ownership so concurrent requests cannot reuse it.
+                try(PreparedStatement p=c.prepareStatement("UPDATE password_reset_tokens SET used_at=? WHERE token_hash=? AND used_at IS NULL AND expires_at>?")) {
+                    p.setTimestamp(1,Timestamp.from(now)); p.setString(2,tokenHash); p.setTimestamp(3,Timestamp.from(now));
+                    if(p.executeUpdate()!=1) { c.rollback(); return Optional.empty(); }
+                }
+                long userId;
+                try(PreparedStatement p=c.prepareStatement("SELECT user_id FROM password_reset_tokens WHERE token_hash=?")) {
+                    p.setString(1,tokenHash); try(ResultSet r=p.executeQuery()) { if(!r.next()) { c.rollback(); return Optional.empty(); } userId=r.getLong(1); }
+                }
+                try(PreparedStatement p=c.prepareStatement("UPDATE users SET password_hash=? WHERE id=?")) {
+                    p.setString(1,newPasswordHash); p.setLong(2,userId); if(p.executeUpdate()!=1) { c.rollback(); return Optional.empty(); }
+                }
+                try(PreparedStatement p=c.prepareStatement("DELETE FROM password_reset_tokens WHERE user_id=? AND token_hash<>?")) { p.setLong(1,userId); p.setString(2,tokenHash); p.executeUpdate(); }
+                c.commit(); return findById(userId);
+            } catch(SQLException e) { c.rollback(); throw e; }
+        } catch(SQLException e) { throw new IllegalStateException("Unable to update password",e); }
+    }
+    @Override public Optional<UserAccount> updatePasswordHash(long userId,String newPasswordHash) {
+        try(Connection c=Database.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                try(PreparedStatement p=c.prepareStatement("UPDATE users SET password_hash=? WHERE id=?")) {
+                    p.setString(1,newPasswordHash); p.setLong(2,userId); if(p.executeUpdate()!=1) { c.rollback(); return Optional.empty(); }
+                }
+                try(PreparedStatement p=c.prepareStatement("DELETE FROM password_reset_tokens WHERE user_id=?")) { p.setLong(1,userId); p.executeUpdate(); }
+                c.commit(); return findById(userId);
+            } catch(SQLException e) { c.rollback(); throw e; }
+        } catch(SQLException e) { throw new IllegalStateException("Unable to update password",e); }
     }
     @Override public boolean linkGoogleSubject(long userId,String email,String googleSubject) {
         String sql="UPDATE users SET google_sub=? WHERE id=? AND lower(email)=? AND google_sub IS NULL";

@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#F8FAFC">
-  <title>HabitFlow | <c:out value="${mode eq 'register' ? 'Create Account' : 'Sign In'}"/></title>
+  <title>HabitFlow | <c:out value="${mode eq 'register' ? 'Create Account' : (mode eq 'forgot' ? 'Password Recovery' : (mode eq 'reset' ? 'Set New Password' : 'Sign In'))}"/></title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/styles.css?v=20261114-obsidian3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -443,46 +443,10 @@
       color: var(--hf-subtext);
       font-size: 12px;
     }
-    .auth-dialog {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: none;
-      place-items: center;
-      padding: 20px;
-      background: rgba(0, 0, 0, 0.62);
-    }
-    .auth-dialog.open {
-      display: grid;
-    }
-    .auth-dialog-card {
-      width: min(100%, 420px);
-      padding: 24px;
-      color: var(--hf-text);
-      background: var(--hf-surface);
-      border: 1px solid var(--hf-border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-    }
-    .auth-dialog-card h3 {
-      margin: 0 0 8px;
-      font: 700 19px 'Plus Jakarta Sans', sans-serif;
-    }
-    .auth-dialog-card p {
-      color: var(--hf-subtext);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    .auth-dialog-card button {
-      min-height: 38px;
-      padding: 0 14px;
-      color: #fff;
-      background: #EF2323;
-      border: 0;
-      border-radius: 9px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    .auth-back-link { display:inline-flex; align-items:center; gap:7px; margin-bottom:20px; color:var(--hf-subtext); font-size:12px; font-weight:700; text-decoration:none; }
+    .auth-back-link:hover { color:var(--hf-text); }
+    .auth-back-link svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .auth-notice { margin-bottom:14px; padding:12px; color:#047857; background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.42); border-radius:12px; font-size:12px; font-weight:600; line-height:1.5; }
     @media (max-width: 900px) {
       .auth-page {
         padding: 16px 18px 28px;
@@ -593,6 +557,64 @@
       </section>
 
       <section class="auth-card hf-crimson-card">
+        <c:if test="${mode eq 'forgot' or mode eq 'reset'}">
+          <a class="auth-back-link" href="${pageContext.request.contextPath}/login"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>Back to sign in</a>
+        </c:if>
+        <c:if test="${mode eq 'forgot' or mode eq 'reset'}">
+          <c:if test="${not empty error}"><div class="auth-error" role="alert"><c:out value="${error}"/></div></c:if>
+        </c:if>
+        <c:if test="${not empty notice}"><div class="auth-notice" role="status"><c:out value="${notice}"/></div></c:if>
+
+        <c:if test="${mode eq 'forgot'}">
+          <p class="auth-kicker">ACCOUNT RECOVERY</p>
+          <h2>Forgot your password?</h2>
+          <p class="auth-subtitle">Recover any email-password account via reset link, or verify ownership instantly with Google.</p>
+          <form method="post" action="${pageContext.request.contextPath}/forgot-password">
+            <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>"/>
+            <label>Account email address
+              <span class="auth-input-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+                <input type="email" name="email" autocomplete="email" required maxlength="254" value="<c:out value='${param.email}'/>" placeholder="you@example.com"/>
+              </span>
+            </label>
+            <small class="auth-hint">We’ll send a one-time password reset link valid for 15 minutes.</small>
+            <button type="submit" class="auth-submit"><span>Send password reset link</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+          </form>
+          <div class="auth-or-divider" role="separator" aria-label="or instant verification"><span>or instant verification</span></div>
+          <a href="${pageContext.request.contextPath}/auth/google?mode=reset" class="auth-google-btn">
+            <svg class="google-g-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.26-.96 2.33-2.04 3.05l3.3 2.56c1.92-1.77 3.04-4.38 3.04-7.46 0-.72-.06-1.41-.19-2.05H12z"/><path fill="#34A853" d="M12 22c2.75 0 5.06-.91 6.75-2.47l-3.3-2.56c-.91.61-2.08.98-3.45.98-2.65 0-4.9-1.79-5.71-4.19H2.88v2.64C4.56 19.74 8.01 22 12 22z"/><path fill="#FBBC05" d="M6.29 13.76A5.98 5.98 0 0 1 5.97 12c0-.61.11-1.21.32-1.76V7.6H2.88A9.98 9.98 0 0 0 2 12c0 1.61.39 3.14 1.08 4.4l3.21-2.64z"/><path fill="#4285F4" d="M12 5.95c1.5 0 2.84.52 3.9 1.53l2.92-2.92C17.05 2.91 14.74 2 12 2 8.01 2 4.56 4.26 2.88 7.6l3.41 2.64C7.1 7.74 9.35 5.95 12 5.95z"/></svg>
+            <span>Verify with Google to reset password</span>
+          </a>
+          <p class="auth-account-switch">Google verification can authorize a reset for the same verified email without permanently linking accounts.</p>
+        </c:if>
+
+        <c:if test="${mode eq 'reset'}">
+          <p class="auth-kicker">ACCOUNT RECOVERY</p>
+          <h2>Set a new password</h2>
+          <p class="auth-subtitle">Your account email is verified. Enter your new password below.</p>
+          <form method="post" action="${pageContext.request.contextPath}/reset-password" id="auth-form">
+            <input type="hidden" name="csrfToken" value="<c:out value='${csrfToken}'/>"/>
+            <input type="hidden" name="token" value="<c:out value='${resetToken}'/>"/>
+            <label>New password
+              <span class="auth-input-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/></svg>
+                <input id="auth-password" type="password" name="password" autocomplete="new-password" required minlength="10" maxlength="72" placeholder="At least 10 characters"/>
+                <button type="button" class="auth-password-toggle" data-password-toggle="auth-password" aria-label="Show password"><svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </span>
+            </label>
+            <label>Confirm new password
+              <span class="auth-input-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/></svg>
+                <input id="auth-confirm-password" type="password" name="confirmPassword" autocomplete="new-password" required minlength="10" maxlength="72" placeholder="Repeat new password"/>
+                <button type="button" class="auth-password-toggle" data-password-toggle="auth-confirm-password" aria-label="Show password confirmation"><svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </span>
+            </label>
+            <small class="auth-hint" id="password-match">Use 10 or more characters. Passwords must match.</small>
+            <button type="submit" class="auth-submit"><span>Update password</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+          </form>
+        </c:if>
+
+        <c:if test="${mode ne 'forgot' and mode ne 'reset'}">
         <nav class="auth-switcher" aria-label="Sign in or create account">
           <a class="${mode ne 'register' ? 'active' : ''}" href="${pageContext.request.contextPath}/login">Sign in</a>
           <a class="${mode eq 'register' ? 'active' : ''}" href="${pageContext.request.contextPath}/register">Create account</a>
@@ -661,7 +683,7 @@
           <c:if test="${mode ne 'register'}">
             <div class="auth-row">
               <label><input type="checkbox" name="remember" checked/> <span>Remember me</span></label>
-              <a class="auth-link" href="#forgot-password" id="forgot-password-link">Forgot password?</a>
+              <a class="auth-link" href="${pageContext.request.contextPath}/forgot-password">Forgot password?</a>
             </div>
           </c:if>
 
@@ -688,19 +710,22 @@
             <c:otherwise>Don’t have an account yet? <a class="auth-link" href="${pageContext.request.contextPath}/register">Create account</a></c:otherwise>
           </c:choose>
         </p>
+        </c:if>
       </section>
     </main>
   </div>
 
-  <div class="auth-dialog" id="forgot-password-dialog" role="dialog" aria-modal="true" aria-labelledby="forgot-password-title" aria-hidden="true">
-    <section class="auth-dialog-card">
-      <h3 id="forgot-password-title">Password recovery</h3>
-      <p>Password reset is unavailable because an email delivery service is not configured for this application.</p>
-      <button type="button" id="close-forgot-password">Close</button>
-    </section>
-  </div>
-
   <script>
+    (function () {
+      if (window.location.pathname.endsWith('/reset-password') && window.location.hash.indexOf('#token=') === 0) {
+        var tokenField = document.querySelector('input[name="token"]');
+        if (tokenField) {
+          try { tokenField.value = decodeURIComponent(window.location.hash.substring(7)); } catch (e) {}
+          window.history.replaceState(null, document.title, window.location.pathname);
+        }
+      }
+    }());
+
     document.getElementById('auth-theme-toggle').addEventListener('click', function () {
       var dark = document.documentElement.classList.toggle('dark');
       try {
@@ -749,29 +774,6 @@
       });
     }
 
-    var dialog = document.getElementById('forgot-password-dialog'),
-        link = document.getElementById('forgot-password-link'),
-        close = document.getElementById('close-forgot-password');
-
-    if (link) {
-      link.addEventListener('click', function (event) {
-        event.preventDefault();
-        dialog.classList.add('open');
-        dialog.setAttribute('aria-hidden', 'false');
-        close.focus();
-      });
-      close.addEventListener('click', function () {
-        dialog.classList.remove('open');
-        dialog.setAttribute('aria-hidden', 'true');
-        link.focus();
-      });
-      dialog.addEventListener('click', function (event) {
-        if (event.target === dialog) {
-          dialog.classList.remove('open');
-          dialog.setAttribute('aria-hidden', 'true');
-        }
-      });
-    }
   </script>
 </body>
 </html>
