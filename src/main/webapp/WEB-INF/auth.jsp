@@ -468,10 +468,34 @@
     .auth-or-divider { display:flex; align-items:center; gap:12px; margin:14px 0; }
     .auth-or-divider::before,.auth-or-divider::after { content:""; flex:1; height:1px; background:var(--hf-border); }
     .auth-or-divider span { color:var(--hf-subtext); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
-    .auth-google-btn { position:relative; width:100%; min-height:46px; border-radius:9999px; border:1px solid var(--hf-border); background:var(--hf-surface); color:var(--hf-text); font-family:inherit; font-size:15px; font-weight:600; line-height:1.2; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:0 20px; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,.04); transition:background .16s ease,border-color .16s ease,transform .15s ease,box-shadow .16s ease; }
+    .auth-google-btn { position:relative; width:100%; min-height:46px; border-radius:9999px; border:1px solid var(--hf-border); background:var(--hf-surface); color:var(--hf-text); font-family:inherit; font-size:15px; font-weight:600; line-height:1.2; white-space:nowrap; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:0 44px; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,.04); transition:background .16s ease,border-color .16s ease,transform .15s ease,box-shadow .16s ease; }
     .auth-google-btn:hover { border-color:var(--hf-subtext); box-shadow:0 4px 12px rgba(15,23,42,.08); }
     .auth-google-btn:active { transform:scale(.995); }
     .auth-google-btn .google-g-icon { position:absolute; left:18px; width:20px; height:20px; flex-shrink:0; }
+    @media (max-width: 520px) {
+      .auth-showcase,
+      .auth-card {
+        padding: 20px 18px;
+      }
+      .auth-wave-wrap {
+        margin: 18px -18px -20px;
+      }
+      .auth-showcase .auth-kicker {
+        font-size: clamp(8.5px, 2.55vw, 10px);
+        letter-spacing: 0.08em;
+        white-space: nowrap;
+      }
+      .auth-google-btn {
+        padding: 0 16px 0 38px;
+        font-size: clamp(11.5px, 3.3vw, 13.5px);
+        white-space: nowrap;
+      }
+      .auth-google-btn .google-g-icon {
+        left: 14px;
+        width: 18px;
+        height: 18px;
+      }
+    }
   </style>
 </head>
 <body>
